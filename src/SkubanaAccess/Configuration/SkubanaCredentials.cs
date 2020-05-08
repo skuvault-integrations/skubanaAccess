@@ -5,11 +5,11 @@ using System.Text;
 
 namespace SkubanaAccess.Configuration
 {
-	public class SkubanaCredentials
+	public class SkubanaUserCredentials
 	{
 		public string AccessToken { get; private set; }
 
-		public SkubanaCredentials( string accessToken )
+		public SkubanaUserCredentials( string accessToken )
 		{
 			Condition.Requires( accessToken, "accessToken" ).IsNotNullOrEmpty();
 

@@ -5,12 +5,12 @@ namespace SkubanaAccess.Configuration
 	public class SkubanaConfig
 	{
 		public SkubanaEnvironment Environment { get; set; }
-		public SkubanaCredentials Credentials { get; private set; }
+		public SkubanaUserCredentials Credentials { get; private set; }
 
 		public ThrottlingOptions ThrottlingOptions { get; private set; }
 		public NetworkOptions NetworkOptions { get; private set; }
 
-		public SkubanaConfig( SkubanaEnvironment environment, SkubanaCredentials credentials, ThrottlingOptions throttlingOptions, NetworkOptions networkOptions )
+		public SkubanaConfig( SkubanaEnvironment environment, SkubanaUserCredentials credentials, ThrottlingOptions throttlingOptions, NetworkOptions networkOptions )
 		{
 			Condition.Requires( environment, "environment" ).IsNotNull();
 			Condition.Requires( credentials, "credentials" ).IsNotNull();
@@ -23,7 +23,7 @@ namespace SkubanaAccess.Configuration
 			this.NetworkOptions = networkOptions;
 		}
 
-		public SkubanaConfig( SkubanaEnvironment environment, SkubanaCredentials credentials )
+		public SkubanaConfig( SkubanaEnvironment environment, SkubanaUserCredentials credentials )
 			: this( environment, credentials, ThrottlingOptions.SkubanaDefaultThrottlingOptions, NetworkOptions.SkubanaDefaultNetworkOptions )
 		{
 		}

@@ -19,7 +19,7 @@ namespace SkubanaAccessTests
 			var env = (SkubanaEnvironmentEnum)Enum.Parse( typeof( SkubanaEnvironmentEnum ), testCredentials.Environment );
 
 			this.Config = new SkubanaConfig( env == SkubanaEnvironmentEnum.Production ? SkubanaEnvironment.Production : SkubanaEnvironment.Sandbox,
-									new SkubanaCredentials( testCredentials.AccessToken ) );
+									new SkubanaUserCredentials( testCredentials.AccessToken ) );
 			this.AppCredentials = new SkubanaAppCredentials( testCredentials.ApplicationKey, testCredentials.ApplicationSecret, testCredentials.RedirectUrl,
 												testCredentials.Scopes.Split( ' ' ) );
 		}
