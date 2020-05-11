@@ -27,6 +27,11 @@ namespace SkubanaAccess.Configuration
 			: this( environment, credentials, ThrottlingOptions.SkubanaDefaultThrottlingOptions, NetworkOptions.SkubanaDefaultNetworkOptions )
 		{
 		}
+
+		public SkubanaConfig( SkubanaEnvironment environment )
+			: this( environment, SkubanaUserCredentials.Blank, ThrottlingOptions.SkubanaDefaultThrottlingOptions, NetworkOptions.SkubanaDefaultNetworkOptions )
+		{
+		}
 	}
 
 	public class SkubanaEnvironment

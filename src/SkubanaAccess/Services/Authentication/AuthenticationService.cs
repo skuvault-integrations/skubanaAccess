@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using SkubanaAccess.Configuration;
 using SkubanaAccess.Models.Commands;
@@ -14,15 +15,15 @@ namespace SkubanaAccess.Authentication.Services
 		{
 		}
 
-		public Task< GetAccessTokenResponse > GetAccessTokenAsync( SkubanaAppCredentials appCredentials, string code, string cid, CancellationToken token )
+		public Task< GetAccessTokenResponse > GetAccessTokenAsync( SkubanaAppCredentials appCredentials, string code, CancellationToken token )
 		{
-			var command = new GetAccessTokenCommand( base.Config, appCredentials.RedirectUrl, code, cid );
+			var command = new GetAccessTokenCommand( base.Config, appCredentials.RedirectUrl, code );
 			return base.PostAsync< GetAccessTokenResponse >( command, token, useBasicAuth: true, appCredentials: appCredentials );
 		}
 
 		public string GetAppInstallationUrl( SkubanaAppCredentials appCredentials )
 		{
-			return $"{ base.Config.Environment.BaseUrl }/oauth/authorize?client_id={ appCredentials.ApplicationKey }&scope={ string.Join( "+", appCredentials.Scopes ) }&redirect_uri={ appCredentials.RedirectUrl }&response_type=code";
+			return $"{ base.Config.Environment.BaseUrl }/oauth/authorize?client_id={ appCredentials.ApplicationKey }&scope={ string.Join( "+", appCredentials.Scopes.Select( s => s.ToString().ToLower() ) ) }&redirect_uri={ appCredentials.RedirectUrl }&response_type=code";
 		}
 	}
 }

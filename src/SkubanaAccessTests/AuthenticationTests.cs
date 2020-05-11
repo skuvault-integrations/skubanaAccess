@@ -47,9 +47,8 @@ namespace SkubanaAccessTests
 		public async Task GetAccessToken()
 		{
 			var code = "ESD8Un";
-			var cid = Guid.NewGuid().ToString();
 
-			var response = await this._service.GetAccessTokenAsync( base.AppCredentials, code, cid, CancellationToken.None );
+			var response = await this._service.GetAccessTokenAsync( base.AppCredentials, code, CancellationToken.None );
 			response.Should().NotBeNull();
 			response.AccessToken.Should().NotBeNullOrEmpty();
 		}

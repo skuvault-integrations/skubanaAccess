@@ -1,5 +1,6 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
+using Netco.Extensions;
 using SkubanaAccess.Configuration;
 using System;
 using System.IO;
@@ -20,8 +21,8 @@ namespace SkubanaAccessTests
 
 			this.Config = new SkubanaConfig( env == SkubanaEnvironmentEnum.Production ? SkubanaEnvironment.Production : SkubanaEnvironment.Sandbox,
 									new SkubanaUserCredentials( testCredentials.AccessToken ) );
-			this.AppCredentials = new SkubanaAppCredentials( testCredentials.ApplicationKey, testCredentials.ApplicationSecret, testCredentials.RedirectUrl,
-												testCredentials.Scopes.Split( ' ' ) );
+			var scopes = testCredentials.Scopes.Split( ' ' ).Select( s => s.ToEnum< SkubanaAppPermissionEnum >() );
+			this.AppCredentials = new SkubanaAppCredentials( testCredentials.ApplicationKey, testCredentials.ApplicationSecret, testCredentials.RedirectUrl, scopes );
 		}
 
 		protected T LoadTestSettings< T >( string filePath )
