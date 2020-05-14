@@ -7,7 +7,7 @@ namespace SkubanaAccess.Services.Authentication
 {
 	public interface IAuthenticationService
 	{
-		string GetAppInstallationUrl( SkubanaAppCredentials appCredentials );
-		Task< GetAccessTokenResponse > GetAccessTokenAsync( SkubanaAppCredentials appCredentials, string code, CancellationToken token );
+		string GetAppInstallationUrl();
+		Task< GetAccessTokenResponse > GetAccessTokenAsync( string code, CancellationToken token );
 	}
 }

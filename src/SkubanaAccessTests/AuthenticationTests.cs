@@ -20,14 +20,14 @@ namespace SkubanaAccessTests
 		[ SetUp ]
 		public void Init()
 		{
-			this._service = new AuthenticationService( base.Config );
+			this._service = new AuthenticationService( base.Config, base.AppCredentials );
 		}
 
 		[ Test ]
 		public void GetSandboxAppInstallationUrl()
 		{
 			base.Config.Environment = SkubanaEnvironment.Sandbox;
-			var appAuthUrl = this._service.GetAppInstallationUrl( base.AppCredentials );
+			var appAuthUrl = this._service.GetAppInstallationUrl();
 
 			appAuthUrl.Should().NotBeNullOrEmpty();
 			appAuthUrl.Should().StartWith( base.Config.Environment.BaseUrl );
@@ -37,7 +37,7 @@ namespace SkubanaAccessTests
 		public void GetProductionAppInstallationUrl()
 		{
 			base.Config.Environment = SkubanaEnvironment.Production;
-			var appAuthUrl = this._service.GetAppInstallationUrl( base.AppCredentials );
+			var appAuthUrl = this._service.GetAppInstallationUrl();
 
 			appAuthUrl.Should().NotBeNullOrEmpty();
 			appAuthUrl.Should().StartWith( base.Config.Environment.BaseUrl );
@@ -48,7 +48,7 @@ namespace SkubanaAccessTests
 		{
 			var code = "ESD8Un";
 
-			var response = await this._service.GetAccessTokenAsync( base.AppCredentials, code, CancellationToken.None );
+			var response = await this._service.GetAccessTokenAsync( code, CancellationToken.None );
 			response.Should().NotBeNull();
 			response.AccessToken.Should().NotBeNullOrEmpty();
 		}

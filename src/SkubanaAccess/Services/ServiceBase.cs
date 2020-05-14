@@ -8,7 +8,6 @@ using SkubanaAccess.Models.Infrastructure;
 using SkubanaAccess.Shared;
 using SkubanaAccess.Throttling;
 using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -19,10 +18,45 @@ using System.Threading.Tasks;
 
 namespace SkubanaAccess.Services
 {
+	public abstract class ServiceBaseWithBasicAuth : ServiceBase
+	{
+		protected SkubanaAppCredentials AppCredentials { get; private set; }
+
+		public ServiceBaseWithBasicAuth( SkubanaConfig config, SkubanaAppCredentials appCredentials ) : base( config )
+		{
+			Condition.Requires( appCredentials, "appCredentials" ).IsNotNull();
+
+			this.AppCredentials = appCredentials;
+		}
+
+		protected override void SetAuthHeader( SkubanaCommand command )
+		{
+			this.HttpClient.DefaultRequestHeaders.Remove( "Authorization" );
+			var headerValue = $"Basic { Convert.ToBase64String( Encoding.UTF8.GetBytes( string.Concat( AppCredentials.ApplicationKey, ":", AppCredentials.ApplicationSecret ) ) ) }";
+			
+			this.HttpClient.DefaultRequestHeaders.Add( "Authorization", headerValue );
+		}
+	}
+
+	public abstract class ServiceBaseWithTokenAuth : ServiceBase
+	{
+		public ServiceBaseWithTokenAuth( SkubanaConfig config ) : base( config )
+		{
+		}
+
+		protected override void SetAuthHeader( SkubanaCommand command )
+		{
+			this.HttpClient.DefaultRequestHeaders.Remove( "Authorization" );
+
+			var headerValue = $"Bearer { this.Config.Credentials.AccessToken } ";
+			this.HttpClient.DefaultRequestHeaders.Add( "Authorization", headerValue );
+		}
+	}
+
 	public abstract class ServiceBase
 	{
 		protected SkubanaConfig Config { get; private set; }
-		protected Throttler Throttler { get; private set; }
+		private Throttler Throttler { get; set; }
 		protected HttpClient HttpClient { get; private set; }
 		protected Func< string > _additionalLogInfo;
 
@@ -48,19 +82,14 @@ namespace SkubanaAccess.Services
 			};
 		}
 
-		protected Task< T > PostAsync< T >( SkubanaCommand command, CancellationToken cancellationToken, Mark mark = null, [ CallerMemberName ] string methodName = "" )
-		{
-			return PostAsync< T >( command, cancellationToken, mark, false, null, methodName );
-		}
-
-		protected async Task< T > PostAsync< T >( SkubanaCommand command, CancellationToken cancellationToken, Mark mark = null, bool useBasicAuth = false, SkubanaAppCredentials appCredentials = null, [ CallerMemberName ] string methodName = "" )
+		protected async Task< T > PostAsync< T >( SkubanaCommand command, CancellationToken cancellationToken, Mark mark = null, [ CallerMemberName ] string methodName = "" )
 		{
 			if ( mark == null )
 				mark = Mark.CreateNew();
 
 			var responseContent = await this.ThrottleRequestAsync( command, mark, methodName, HttpMethod.Post, async ( token ) =>
 			{
-				this.SetAuthHeader( command, useBasicAuth, appCredentials );
+				this.SetAuthHeader( command );
 
 				StringContent payload = null;
 				if ( command.Payload != null )
@@ -86,23 +115,51 @@ namespace SkubanaAccess.Services
 			return response;
 		}
 
-		private void SetAuthHeader( SkubanaCommand command, bool useBasicAuth = false, SkubanaAppCredentials appCredentials = null )
+		protected async Task< T > PutAsync< T >( SkubanaCommand command, CancellationToken cancellationToken, Mark mark = null, [ CallerMemberName ] string methodName = "" )
 		{
-			this.HttpClient.DefaultRequestHeaders.Remove( "Authorization" );
+			if ( mark == null )
+				mark = Mark.CreateNew();
 
-			string headerValue = null;
-
-			if ( useBasicAuth && appCredentials != null )
+			var responseContent = await this.ThrottleRequestAsync( command, mark, methodName, HttpMethod.Put, async ( token ) =>
 			{
-				headerValue = $"Basic { Convert.ToBase64String( Encoding.UTF8.GetBytes( string.Concat( appCredentials.ApplicationKey, ":", appCredentials.ApplicationSecret ) ) ) }";
-			}
-			else
-			{
-				headerValue = $"Bearer { Convert.ToBase64String( Encoding.UTF8.GetBytes( this.Config.Credentials.AccessToken ) ) } ";
-			}
+				this.SetAuthHeader( command );
 
-			this.HttpClient.DefaultRequestHeaders.Add( "Authorization", headerValue );
+				var payload = new StringContent( command.Payload.ToJson(), Encoding.UTF8, "application/json" );
+				payload.Headers.ContentType = MediaTypeHeaderValue.Parse( "application/json" );
+
+				var httpResponse = await HttpClient.PutAsync( command.Url, payload ).ConfigureAwait( false );
+				var content = await httpResponse.Content.ReadAsStringAsync().ConfigureAwait( false );
+
+				ThrowIfError( httpResponse, content );
+
+				return content;
+			}, cancellationToken ).ConfigureAwait( false );
+
+			var response = JsonConvert.DeserializeObject< T >( responseContent );
+
+			return response;
 		}
+
+		protected async Task< T > GetAsync< T >( SkubanaCommand command, CancellationToken cancellationToken, Mark mark = null, [ CallerMemberName ] string methodName = "" )
+		{
+			if ( mark == null )
+				mark = Mark.CreateNew();
+
+			var responseContent = await this.ThrottleRequestAsync( command, mark, methodName, HttpMethod.Get, async ( token ) =>
+			{
+				this.SetAuthHeader( command );
+				var httpResponse = await HttpClient.GetAsync( command.Url ).ConfigureAwait( false );
+				var content = await httpResponse.Content.ReadAsStringAsync().ConfigureAwait( false );
+
+				ThrowIfError( httpResponse, content );
+
+				return content;
+			}, cancellationToken ).ConfigureAwait( false );
+
+			return JsonConvert.DeserializeObject< T >( responseContent );
+		}
+
+		protected abstract void SetAuthHeader( SkubanaCommand command );
 
 		protected void ThrowIfError( HttpResponseMessage response, string message )
 		{
@@ -118,7 +175,8 @@ namespace SkubanaAccess.Services
 
 		private Task< T > ThrottleRequestAsync< T >( SkubanaCommand command, Mark mark, string methodName, HttpMethod methodType, Func< CancellationToken, Task< T > > processor, CancellationToken token )
 		{
-			return Throttler.ExecuteAsync( () =>
+			var throttler = command.Throttler ?? this.Throttler;
+			return throttler.ExecuteAsync( () =>
 			{
 				return new ActionPolicy( Config.NetworkOptions.RetryAttempts, Config.NetworkOptions.DelayBetweenFailedRequestsInSec, Config.NetworkOptions.DelayFailRequestRate )
 					.ExecuteAsync( async () =>

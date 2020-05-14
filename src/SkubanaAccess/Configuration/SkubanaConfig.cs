@@ -10,6 +10,12 @@ namespace SkubanaAccess.Configuration
 		public ThrottlingOptions ThrottlingOptions { get; private set; }
 		public NetworkOptions NetworkOptions { get; private set; }
 
+		public int RetrieveProductsStocksTotalPageSize { get; set; }
+
+		public int UpdateProductStockBatchSize { get; set; }
+		public int CreateProductStockBatchSize { get; set; }
+		public int RetrieveProductsBatchSize { get; set; }
+
 		public SkubanaConfig( SkubanaEnvironment environment, SkubanaUserCredentials credentials, ThrottlingOptions throttlingOptions, NetworkOptions networkOptions )
 		{
 			Condition.Requires( environment, "environment" ).IsNotNull();
@@ -21,6 +27,12 @@ namespace SkubanaAccess.Configuration
 			this.Credentials = credentials;
 			this.ThrottlingOptions = throttlingOptions;
 			this.NetworkOptions = networkOptions;
+
+			this.RetrieveProductsStocksTotalPageSize = 200;
+
+			this.UpdateProductStockBatchSize = 200;
+			this.CreateProductStockBatchSize = 200;
+			this.RetrieveProductsBatchSize = 10;
 		}
 
 		public SkubanaConfig( SkubanaEnvironment environment, SkubanaUserCredentials credentials )
@@ -36,16 +48,18 @@ namespace SkubanaAccess.Configuration
 
 	public class SkubanaEnvironment
 	{
-		public static SkubanaEnvironment Sandbox = new SkubanaEnvironment( SkubanaEnvironmentEnum.Sandbox, "https://demo.skubana.com" );
-		public static SkubanaEnvironment Production = new SkubanaEnvironment( SkubanaEnvironmentEnum.Production, "https://app.skubana.com" );
+		public static SkubanaEnvironment Sandbox = new SkubanaEnvironment( SkubanaEnvironmentEnum.Sandbox, "https://demo.skubana.com", "https://api.demo.skubana.com" );
+		public static SkubanaEnvironment Production = new SkubanaEnvironment( SkubanaEnvironmentEnum.Production, "https://app.skubana.com", "https://api.skubana.com" );
 
 		public SkubanaEnvironmentEnum Type { get; private set; }
 		public string BaseUrl { get; private set; }
+		public string BaseApiUrl { get; private set; }
 
-		private SkubanaEnvironment( SkubanaEnvironmentEnum type, string baseUrl )
+		private SkubanaEnvironment( SkubanaEnvironmentEnum type, string baseUrl, string baseApiUrl )
 		{
 			this.Type = type;
 			this.BaseUrl = baseUrl;
+			this.BaseApiUrl = baseApiUrl;
 		}
 	}
 
