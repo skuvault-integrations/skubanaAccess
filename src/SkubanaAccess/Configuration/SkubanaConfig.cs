@@ -52,13 +52,13 @@ namespace SkubanaAccess.Configuration
 		public static SkubanaEnvironment Production = new SkubanaEnvironment( SkubanaEnvironmentEnum.Production, "https://app.skubana.com", "https://api.skubana.com" );
 
 		public SkubanaEnvironmentEnum Type { get; private set; }
-		public string BaseUrl { get; private set; }
+		public string BaseAuthUrl { get; private set; }
 		public string BaseApiUrl { get; private set; }
 
-		private SkubanaEnvironment( SkubanaEnvironmentEnum type, string baseUrl, string baseApiUrl )
+		private SkubanaEnvironment( SkubanaEnvironmentEnum type, string baseAuthUrl, string baseApiUrl )
 		{
 			this.Type = type;
-			this.BaseUrl = baseUrl;
+			this.BaseAuthUrl = baseAuthUrl;
 			this.BaseApiUrl = baseApiUrl;
 		}
 	}

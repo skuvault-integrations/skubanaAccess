@@ -30,7 +30,7 @@ namespace SkubanaAccessTests
 			var appAuthUrl = this._service.GetAppInstallationUrl();
 
 			appAuthUrl.Should().NotBeNullOrEmpty();
-			appAuthUrl.Should().StartWith( base.Config.Environment.BaseUrl );
+			appAuthUrl.Should().StartWith( base.Config.Environment.BaseAuthUrl );
 		}
 
 		[ Test ]
@@ -40,13 +40,13 @@ namespace SkubanaAccessTests
 			var appAuthUrl = this._service.GetAppInstallationUrl();
 
 			appAuthUrl.Should().NotBeNullOrEmpty();
-			appAuthUrl.Should().StartWith( base.Config.Environment.BaseUrl );
+			appAuthUrl.Should().StartWith( base.Config.Environment.BaseAuthUrl );
 		}
 
 		[ Test ]
 		public async Task GetAccessToken()
 		{
-			var code = "ESD8Un";
+			var code = "EPu5t1";
 
 			var response = await this._service.GetAccessTokenAsync( code, CancellationToken.None );
 			response.Should().NotBeNull();

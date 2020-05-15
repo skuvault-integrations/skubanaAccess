@@ -1,12 +1,13 @@
 ﻿using SkubanaAccess.Models;
 using SkubanaAccess.Shared;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace SkubanaAccess.Services.Inventory
 {
-	public interface IInventoryService
+	public interface IInventoryService : IDisposable
 	{
 		Task CreateProductStock( long productId, int quantity, long warehouseId, CancellationToken token, Mark mark = null );
 		Task CreateProductsStock( Dictionary< long, int > productsQuantities, long warehouseId, CancellationToken token, Mark mark = null );

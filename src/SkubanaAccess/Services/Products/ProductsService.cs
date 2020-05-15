@@ -4,9 +4,7 @@ using SkubanaAccess.Models;
 using SkubanaAccess.Models.Commands;
 using SkubanaAccess.Shared;
 using SkubanaAccess.Throttling;
-using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -30,21 +28,23 @@ namespace SkubanaAccess.Services.Products
 				SkubanaLogger.LogTraceException( new SkubanaException( string.Format( "{0}. Retrieve products request was cancelled", exceptionDetails ) ) );
 			}
 
-			var throttler = new Throttler( 5, 1 );
 			var chunks = skus.SplitToChunks( base.Config.RetrieveProductsBatchSize );
 			var result = new List< Product >();
 
-			foreach( var chunk in chunks )
+			using( var throttler = new Throttler( 5, 1 ) )
 			{
-				var command = new RetrieveProductsCommand( base.Config, chunk )
+				foreach( var chunk in chunks )
 				{
-					Throttler = throttler
-				};
-				var response = await base.GetAsync< IEnumerable< Product > >( command, token, mark );
+					var command = new RetrieveProductsCommand( base.Config, chunk )
+					{
+						Throttler = throttler
+					};
+					var response = await base.GetAsync< IEnumerable< Product > >( command, token, mark );
 
-				if ( response != null )
-				{
-					result.AddRange( response );
+					if ( response != null )
+					{
+						result.AddRange( response );
+					}
 				}
 			}
 			

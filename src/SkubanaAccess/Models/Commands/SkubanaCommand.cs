@@ -1,12 +1,13 @@
 ﻿using CuttingEdge.Conditions;
 using SkubanaAccess.Configuration;
 using SkubanaAccess.Throttling;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace SkubanaAccess.Models.Commands
 {
-	public abstract class SkubanaCommand
+	public abstract class SkubanaCommand : IDisposable
 	{
 		/// <summary>
 		///	HTTP body content
@@ -28,7 +29,7 @@ namespace SkubanaAccess.Models.Commands
 				if ( !string.IsNullOrEmpty( this._absoluteUrl ) )
 					return this._absoluteUrl;
 
-				var absoluteUrl = $"{ ( this._isApiCommand ? this.Config.Environment.BaseApiUrl : this.Config.Environment.BaseUrl ) }{ this.RelativeUrl }";
+				var absoluteUrl = $"{ ( this._isApiCommand ? this.Config.Environment.BaseApiUrl : this.Config.Environment.BaseAuthUrl ) }{ this.RelativeUrl }";
 
 				if ( this.RequestParameters != null && this.RequestParameters.Any() )
 				{
@@ -66,6 +67,29 @@ namespace SkubanaAccess.Models.Commands
 		protected SkubanaCommand( SkubanaConfig config, string relativeUrl, object payload ) : this( config, relativeUrl, null, payload )
 		{
 		}
+
+		#region IDisposable Support
+		private bool disposedValue = false;
+
+		protected virtual void Dispose( bool disposing )
+		{
+			if ( !disposedValue )
+			{
+				if ( disposing )
+				{
+					if ( this.Throttler != null )
+						this.Throttler.Dispose();
+				}
+
+				disposedValue = true;
+			}
+		}
+
+		public void Dispose()
+		{
+			Dispose( true );
+		}
+		#endregion
 	}
 
 	public class SkubanaEndpoint

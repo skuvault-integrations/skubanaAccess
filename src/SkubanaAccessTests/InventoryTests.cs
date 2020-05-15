@@ -46,6 +46,7 @@ namespace SkubanaAccessTests
 		[ Test ]
 		public async Task UpdateSkuQuantity()
 		{
+			Thread.Sleep( 10 * 1000 );
 			int newQuantity = new Random().Next( 1, 100 );
 
 			await this._inventoryService.AdjustProductStockQuantity( _testSku1, newQuantity, _warehouseId, CancellationToken.None );
@@ -57,6 +58,7 @@ namespace SkubanaAccessTests
 		[ Test ]
 		public async Task UpdateSkuQuantityToZero()
 		{
+			Thread.Sleep( 10 * 1000 );
 			await this._inventoryService.AdjustProductStockQuantity( _testSku1, 0, _warehouseId, CancellationToken.None );
 			var stock = await this._inventoryService.GetProductStock( _testSku1, _warehouseId, CancellationToken.None );
 
@@ -66,6 +68,7 @@ namespace SkubanaAccessTests
 		[ Test ]
 		public async Task UpdateSkuQuantityToQuantityThatExceedMaxQuantity()
 		{
+			Thread.Sleep( 10 * 1000 );
 			int maxQuantity = 100 * 1000 * 1000 + 1; // 100,000,000 + 1
 			await this._inventoryService.AdjustProductStockQuantity( _testSku1, maxQuantity, _warehouseId, CancellationToken.None );
 			var stock = await this._inventoryService.GetProductStock( _testSku1, _warehouseId, CancellationToken.None );
@@ -76,6 +79,7 @@ namespace SkubanaAccessTests
 		[ Test ]
 		public async Task UpdateSkusQuantities()
 		{
+			Thread.Sleep( 10 * 1000 );
 			var random = new Random();
 			var skusQuantities = new Dictionary< string, int >()
 			{
@@ -95,6 +99,7 @@ namespace SkubanaAccessTests
 		[ Test ]
 		public async Task UpdateSkusQuantitiesWhenOneOfTheSkusDoesntHaveStock()
 		{
+			Thread.Sleep( 10 * 1000 );
 			var random = new Random();
 			var skusQuantities = new Dictionary< string, int >()
 			{
@@ -109,6 +114,7 @@ namespace SkubanaAccessTests
 		[ Test ]
 		public async Task UpdateSkusQuantitiesWhenOneOfTheSkusDoesntExist()
 		{
+			Thread.Sleep( 10 * 1000 );
 			var random = new Random();
 			var skusQuantities = new Dictionary< string, int >()
 			{
@@ -136,6 +142,7 @@ namespace SkubanaAccessTests
 		[ Test ]
 		public async Task UpdateProductsStocksWhenExceedsBatchSize()
 		{
+			Thread.Sleep( 10 * 1000 );
 			var skusQuantities = new Dictionary< string, int >();
 			var random = new Random();
 			var i = 1;

@@ -38,48 +38,42 @@ namespace SkubanaAccess.Services.Inventory
 				SkubanaLogger.LogTraceException( new SkubanaException( string.Format( "{0}. Adjust products stocks quantities request was cancelled", exceptionDetails ) ) );
 			}
 
-			var throttler = new Throttler( 1, 10 );
 			var chunks = skusQuantities.SplitToChunks( this.Config.UpdateProductStockBatchSize );
 			var result = new AdjustProductStockQuantityResponse();
 
-			foreach( var chunk in chunks )
+			using( var throttler = new Throttler( 1, 10 ) )
 			{
-				var command = new AdjustProductsStockCommand( base.Config, chunk, warehouseId )
+				foreach( var chunk in chunks )
 				{
-					Throttler = throttler
-				};
-				var response = await base.PostAsync< SkubanaResponse< UpdatedProductStockInfo > >( command, token, mark ).ConfigureAwait( false );
-
-				if ( response.Errors != null && response.Errors.Any() )
-				{
-					var criticalErrors = new List< SkubanaResponseError >();
-
-					foreach( var error in response.Errors )
+					var command = new AdjustProductsStockCommand( base.Config, chunk, warehouseId )
 					{
-						switch( error.ErrorCode )
-						{
-							// product stock not found
-							case "ERR097":
-								{
-									result.ProductsWithoutStocks.Add( error.Identifier );
-									break;
-								}
-							// product does not exist
-							case "ERR053":
-								{
-									result.ProductsNotExist.Add( error.Identifier );
-									break;
-								}
-							default:
-								{
-									criticalErrors.Add( error );
-									break;
-								}
-						}
-					}
+						Throttler = throttler
+					};
+					var response = await base.PostAsync< SkubanaResponse< UpdatedProductStockInfo > >( command, token, mark ).ConfigureAwait( false );
 
-					if ( criticalErrors.Any() )
-						throw new SkubanaException( criticalErrors.ToJson() );
+					if ( response.Errors != null && response.Errors.Any() )
+					{
+						var criticalErrors = new List< SkubanaResponseError >();
+
+						foreach( var error in response.Errors )
+						{
+							if ( error.ErrorCode == SkubanaValidationErrors.ProductStockNotFound.Code )
+							{
+								result.ProductsWithoutStocks.Add( error.Identifier );
+							}
+							else if ( error.ErrorCode == SkubanaValidationErrors.ProductDoesNotExist.Code )
+							{
+								result.ProductsNotExist.Add( error.Identifier );
+							}
+							else
+							{
+								criticalErrors.Add( error );
+							}
+						}
+
+						if ( criticalErrors.Any() )
+							throw new SkubanaException( criticalErrors.ToJson() );
+					}
 				}
 			}
 
@@ -125,20 +119,22 @@ namespace SkubanaAccess.Services.Inventory
 				SkubanaLogger.LogTraceException( new SkubanaException( string.Format( "{0}. Create products stocks request was cancelled", exceptionDetails ) ) );
 			}
 
-			var throttler = new Throttler( 1, 30 );
 			var chunks = productsQuantities.SplitToChunks( base.Config.CreateProductStockBatchSize );
 
-			foreach( var chunk in chunks )
+			using( var throttler = new Throttler( 1, 30 ) )
 			{
-				var command = new CreateProductsStockCommand( base.Config, chunk, warehouseId )
+				foreach( var chunk in chunks )
 				{
-					Throttler = throttler
-				};
-				var response = await base.PutAsync< SkubanaResponse< UpdatedProductStockInfo > >( command, token, mark ).ConfigureAwait( false );
+					var command = new CreateProductsStockCommand( base.Config, chunk, warehouseId )
+					{
+						Throttler = throttler
+					};
+					var response = await base.PutAsync< SkubanaResponse< UpdatedProductStockInfo > >( command, token, mark ).ConfigureAwait( false );
 
-				if ( response.Errors != null && response.Errors.Any() )
-				{
-					throw new SkubanaException( response.Errors.ToJson() );
+					if ( response.Errors != null && response.Errors.Any() )
+					{
+						throw new SkubanaException( response.Errors.ToJson() );
+					}
 				}
 			}
 		}
@@ -173,25 +169,27 @@ namespace SkubanaAccess.Services.Inventory
 			}
 
 			var productsStock = new List< ProductStock >();
-			var throttler = new Throttler( 10, 1 );
 			int pageIndex = 1;
 
-			while( true )
+			using( var throttler = new Throttler( 10, 1 ) )
 			{
-				var command = new RetrieveProductsStocksTotalCommand( base.Config, warehouseId, pageIndex, base.Config.RetrieveProductsStocksTotalPageSize )
+				while( true )
 				{
-					Throttler = throttler
-				};
+					var command = new RetrieveProductsStocksTotalCommand( base.Config, warehouseId, pageIndex, base.Config.RetrieveProductsStocksTotalPageSize )
+					{
+						Throttler = throttler
+					};
 
-				var pageData = await base.GetAsync< IEnumerable< ProductStock > >( command, token, mark ).ConfigureAwait( false );
+					var pageData = await base.GetAsync< IEnumerable< ProductStock > >( command, token, mark ).ConfigureAwait( false );
 
-				if ( pageData == null || !pageData.Any() )
-				{
-					break;
+					if ( pageData == null || !pageData.Any() )
+					{
+						break;
+					}
+
+					++pageIndex;
+					productsStock.AddRange( pageData );
 				}
-
-				++pageIndex;
-				productsStock.AddRange( pageData );
 			}
 
 			return productsStock;
@@ -218,13 +216,11 @@ namespace SkubanaAccess.Services.Inventory
 				SkubanaLogger.LogTraceException( new SkubanaException( string.Format( "{0}. Retrieve product stock total request was cancelled", exceptionDetails ) ) );
 			}
 
-			var command = new GetProductStockTotalCommand( base.Config, sku, warehouseId )
+			using( var command = new GetProductStockTotalCommand( base.Config, sku, warehouseId ){ Throttler = new Throttler( 10, 1 ) } )
 			{
-				Throttler = new Throttler( 10, 1 )
-			};
-
-			var stock = await base.GetAsync< IEnumerable< ProductStock > >( command, token, mark ).ConfigureAwait( false );
-			return stock.FirstOrDefault();
+				var stock = await base.GetAsync< IEnumerable< ProductStock > >( command, token, mark ).ConfigureAwait( false );
+				return stock.FirstOrDefault();
+			}
 		}
 	}
 }

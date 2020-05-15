@@ -27,8 +27,11 @@ namespace SkubanaAccess.Services.Global
 				SkubanaLogger.LogTraceException( new SkubanaException( string.Format( "{0}. List warehouses request was cancelled", exceptionDetails ) ) );
 			}
 
-			var response = await base.GetAsync< IEnumerable< Warehouse > >( new ListWarehousesCommand( base.Config ), token, mark );
-			return response.Select( r => r.ToSVWarehouse() );
+			using( var command = new ListWarehousesCommand( base.Config ) )
+			{
+				var response = await base.GetAsync< IEnumerable< Warehouse > >( command, token, mark );
+				return response.Select( r => r.ToSVWarehouse() );
+			}
 		}
 	}
 }

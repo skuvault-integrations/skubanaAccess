@@ -53,7 +53,7 @@ namespace SkubanaAccess.Services
 		}
 	}
 
-	public abstract class ServiceBase
+	public abstract class ServiceBase : IDisposable
 	{
 		protected SkubanaConfig Config { get; private set; }
 		private Throttler Throttler { get; set; }
@@ -78,7 +78,7 @@ namespace SkubanaAccess.Services
 
 			HttpClient = new HttpClient()
 			{
-				BaseAddress = new Uri( Config.Environment.BaseUrl ) 
+				BaseAddress = new Uri( Config.Environment.BaseApiUrl ) 
 			};
 		}
 
@@ -224,5 +224,27 @@ namespace SkubanaAccess.Services
 				Errors = errors
 			}.ToJson();
 		}
+
+		#region IDisposable Support
+		private bool disposedValue = false;
+
+		protected virtual void Dispose( bool disposing )
+		{
+			if ( !disposedValue )
+			{
+				if ( disposing )
+				{
+					this.Throttler.Dispose();
+				}
+
+				disposedValue = true;
+			}
+		}
+
+		public void Dispose()
+		{
+			Dispose( true );
+		}
+		#endregion
 	}
 }
