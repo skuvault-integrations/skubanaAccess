@@ -9,21 +9,23 @@ using SkubanaAccess.Services.Authentication;
 
 namespace SkubanaAccess.Authentication.Services
 {
-	public class AuthenticationService : ServiceBase, IAuthenticationService
+	public class AuthenticationService : ServiceBaseWithBasicAuth, IAuthenticationService
 	{
-		public AuthenticationService( SkubanaConfig config ) : base( config )
+		public AuthenticationService( SkubanaConfig config, SkubanaAppCredentials appCredentials ) : base( config, appCredentials )
 		{
 		}
 
-		public Task< GetAccessTokenResponse > GetAccessTokenAsync( SkubanaAppCredentials appCredentials, string code, CancellationToken token )
+		public Task< GetAccessTokenResponse > GetAccessTokenAsync( string code, CancellationToken token )
 		{
-			var command = new GetAccessTokenCommand( base.Config, appCredentials.RedirectUrl, code );
-			return base.PostAsync< GetAccessTokenResponse >( command, token, useBasicAuth: true, appCredentials: appCredentials );
+			using( var command = new GetAccessTokenCommand( base.Config, AppCredentials.RedirectUrl, code ) )
+			{
+				return base.PostAsync< GetAccessTokenResponse >( command, token );
+			}
 		}
 
-		public string GetAppInstallationUrl( SkubanaAppCredentials appCredentials )
+		public string GetAppInstallationUrl()
 		{
-			return $"{ base.Config.Environment.BaseUrl }/oauth/authorize?client_id={ appCredentials.ApplicationKey }&scope={ string.Join( "+", appCredentials.Scopes.Select( s => s.ToString().ToLower() ) ) }&redirect_uri={ appCredentials.RedirectUrl }&response_type=code";
+			return $"{ base.Config.Environment.BaseAuthUrl }/oauth/authorize?client_id={ AppCredentials.ApplicationKey }&scope={ string.Join( "+", AppCredentials.Scopes.Select( s => s.ToString().ToLower() ) ) }&redirect_uri={ AppCredentials.RedirectUrl }&response_type=code";
 		}
 	}
 }

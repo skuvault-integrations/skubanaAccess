@@ -68,6 +68,9 @@
   <ItemGroup>
     <Compile Include="AuthenticationTests.cs" />
     <Compile Include="BaseTest.cs" />
+    <Compile Include="GlobalTests.cs" />
+    <Compile Include="InventoryTests.cs" />
+    <Compile Include="ProductsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestCredentials.cs" />
   </ItemGroup>
