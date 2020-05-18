@@ -9,6 +9,7 @@ namespace SkubanaAccess.Services.Products
 {
 	public interface IProductsService : IDisposable
 	{
-		Task< IEnumerable< Product > > GetProductsBySkus( IEnumerable< string > skus, CancellationToken token, Mark mark = null );
+		Task< IEnumerable< SkubanaProduct > > GetProductsBySkus( IEnumerable< string > skus, CancellationToken token, Mark mark = null );
+		Task< IEnumerable< SkubanaProduct > > GetProductsUpdatedAfterAsync( DateTime updatedAfterUtc, CancellationToken token, Mark mark = null );
 	}
 }

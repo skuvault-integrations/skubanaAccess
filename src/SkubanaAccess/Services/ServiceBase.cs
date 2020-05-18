@@ -60,6 +60,8 @@ namespace SkubanaAccess.Services
 		protected HttpClient HttpClient { get; private set; }
 		protected Func< string > _additionalLogInfo;
 
+		private int _tooManyRequests = 429;
+
 		/// <summary>
 		///	Extra logging information
 		/// </summary>
@@ -167,6 +169,8 @@ namespace SkubanaAccess.Services
 			{
 				throw new SkubanaUnauthorizedException( message );
 			}
+			else if ( (int)response.StatusCode == _tooManyRequests )
+				throw new SkubanaRequestQuotaExceeded( message );
 			else if ( !response.IsSuccessStatusCode )
 			{
 				throw new SkubanaException( message );

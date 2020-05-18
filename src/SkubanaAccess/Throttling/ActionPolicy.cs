@@ -50,6 +50,9 @@ namespace SkubanaAccess.Throttling
 					}
 					catch ( Exception exception )
 					{
+						if ( exception is SkubanaNetworkException )
+							throw exception;
+
 						SkubanaException skubanaException = null;
 						var exceptionDetails = string.Empty;
 

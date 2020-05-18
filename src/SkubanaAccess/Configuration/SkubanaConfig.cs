@@ -11,6 +11,7 @@ namespace SkubanaAccess.Configuration
 		public NetworkOptions NetworkOptions { get; private set; }
 
 		public int RetrieveProductsStocksTotalPageSize { get; set; }
+		public int RetrieveProductsPageSize { get; set; }
 
 		public int UpdateProductStockBatchSize { get; set; }
 		public int CreateProductStockBatchSize { get; set; }
@@ -33,6 +34,7 @@ namespace SkubanaAccess.Configuration
 			this.UpdateProductStockBatchSize = 200;
 			this.CreateProductStockBatchSize = 200;
 			this.RetrieveProductsBatchSize = 10;
+			this.RetrieveProductsPageSize = 20;
 		}
 
 		public SkubanaConfig( SkubanaEnvironment environment, SkubanaUserCredentials credentials )
