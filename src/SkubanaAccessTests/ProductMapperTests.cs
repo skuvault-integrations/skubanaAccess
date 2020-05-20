@@ -40,6 +40,35 @@ namespace SkubanaAccessTests
 						Rank = 2
 					},
 				},
+				AttributeGroups = new ProductAttributeGroup[]
+				{
+					new ProductAttributeGroup()
+					{
+						Id = 1,
+						Name = "Color",
+						Attributes = new ProductAttribute[]
+						{
+							new ProductAttribute()
+							{
+								Id = 1,
+								Name = "Gold"
+							}
+						}
+					},
+					new ProductAttributeGroup()
+					{
+						Id = 2,
+						Name = "Size",
+						Attributes = new ProductAttribute[]
+						{
+							new ProductAttribute()
+							{
+								Id = 1,
+								Name = "46"
+							}
+						}
+					},
+				},
 				IsActive = true
 			};
 
@@ -58,6 +87,9 @@ namespace SkubanaAccessTests
 			svProduct.PartNumber.Should().Be( product.Mpn );
 			svProduct.LongDescription.Should().Be( product.Description );
 			svProduct.ImagesUrls.Should().BeEquivalentTo( product.ImageUrls.Select( i => i.Url ) );
+			svProduct.Attributes.Count.Should().Be( product.AttributeGroups.Count() );
+			svProduct.Attributes.First().Key.Should().Be( product.AttributeGroups.First().Name );
+			svProduct.Attributes.First().Value.Should().Be( product.AttributeGroups.First().Attributes.First().Name );
 			svProduct.IsActive.Should().Be( product.IsActive );
 		}
 	}

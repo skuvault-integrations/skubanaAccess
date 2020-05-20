@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using CuttingEdge.Conditions;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,6 +50,8 @@ namespace SkubanaAccess.Models
 		public decimal Length { get; set; }
 		[ JsonProperty( "digital" ) ]
 		public bool IsDigital { get; set; }
+		[ JsonProperty( "attributeGroups" ) ]
+		public IEnumerable< ProductAttributeGroup > AttributeGroups { get; set; }
 	}
 
 	public class Money
@@ -67,6 +70,38 @@ namespace SkubanaAccess.Models
 		public int Rank { get; set; }
 	}
 
+	public struct ProductType
+	{
+		public static ProductType CoreProduct = new ProductType( "CORE_PRODUCT" );
+		public static ProductType VirtualProduct = new ProductType( "VIRTUAL_PRODUCT" );
+
+		public string Type { get; private set; }
+
+		public ProductType( string type )
+		{
+			Condition.Requires( type, "type" ).IsNotNullOrEmpty();
+			this.Type = type;
+		}
+	}
+
+	public class ProductAttributeGroup
+	{
+		[ JsonProperty( "attributeGroupId" ) ]
+		public long Id { get; set; }
+		[ JsonProperty( "name" ) ]
+		public string Name { get; set; }
+		[ JsonProperty( "attributes" ) ]
+		public IEnumerable< ProductAttribute > Attributes { get; set; }
+	}
+
+	public class ProductAttribute
+	{
+		[ JsonProperty( "attributeId" ) ]
+		public long Id { get; set; }
+		[ JsonProperty( "name" ) ]
+		public string Name { get; set; }
+	}
+
 	public class SkubanaProduct
 	{
 		public long Id { get; set; }
@@ -82,6 +117,7 @@ namespace SkubanaAccess.Models
 		public string PartNumber { get; set; }
 		public string LongDescription { get; set; }
 		public IEnumerable< string > ImagesUrls { get; set; }
+		public IDictionary< string, string > Attributes { get; set; }
 		public bool IsActive { get; set; }
 	}
 
@@ -103,9 +139,47 @@ namespace SkubanaAccess.Models
 				Weight = product.Weight,
 				PartNumber = product.Mpn,
 				LongDescription = product.Description,
-				ImagesUrls = product.ImageUrls.OrderBy( i => i.Rank ).Select( i => i.Url ),
+				ImagesUrls = GetImageUrls( product.ImageUrls ),
+				Attributes = GetAttributes( product.AttributeGroups ),
 				IsActive = product.IsActive
 			};
+		}
+
+		private static IEnumerable< string > GetImageUrls( IEnumerable< ProductImage > images )
+		{
+			if ( images == null || !images.Any() )
+				return Array.Empty< string >();
+
+			return images.Where( i => !string.IsNullOrEmpty( i.Url ) )
+						.OrderBy( i => i.Rank )
+						.Select( i => i.Url );
+		}
+
+		private static IDictionary< string, string > GetAttributes( IEnumerable< ProductAttributeGroup > attributeGroups )
+		{
+			if ( attributeGroups == null || !attributeGroups.Any() )
+				return new Dictionary< string, string >();
+
+			var attributes = new Dictionary< string, string >();
+			foreach( var attributeGroup in attributeGroups )
+			{
+				var attributeName = attributeGroup.Name;
+
+				if ( string.IsNullOrEmpty( attributeName ) )
+					continue;
+
+				var attributeValue = attributeGroup.Attributes?.FirstOrDefault( a => !string.IsNullOrEmpty( a.Name ) );
+
+				if ( attributeValue != null )
+				{
+					if ( !attributes.ContainsKey( attributeName ) )
+					{
+						attributes.Add( attributeName, attributeValue.Name );
+					}
+				}
+			}
+
+			return attributes;
 		}
 	}
 }

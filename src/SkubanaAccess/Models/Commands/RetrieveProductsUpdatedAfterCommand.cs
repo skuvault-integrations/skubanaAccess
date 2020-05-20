@@ -14,7 +14,7 @@ namespace SkubanaAccess.Models.Commands
 
 			this.RequestParameters = new Dictionary< string, string >()
 			{
-				{ "createdDateFrom", updatedAfterUtc.ToString( "yyyy-MM-ddTHH:mm:ssZ" ) },
+				{ "modifiedDateFrom", updatedAfterUtc.ToString( "yyyy-MM-ddTHH:mm:ssZ" ) },
 				{ "page", page.ToString() },
 				{ "limit", limit.ToString() }
 			};

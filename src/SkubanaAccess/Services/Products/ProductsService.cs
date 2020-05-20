@@ -29,7 +29,7 @@ namespace SkubanaAccess.Services.Products
 				SkubanaLogger.LogTraceException( new SkubanaException( string.Format( "{0}. Retrieve products request was cancelled", exceptionDetails ) ) );
 			}
 
-			var chunks = skus.SplitToChunks( base.Config.RetrieveProductsBatchSize );
+			var chunks = skus.SplitToChunks( base.Config.RetrieveProductsBySkusBatchSize );
 			var result = new List< SkubanaProduct >();
 
 			using( var throttler = new Throttler( 5, 1 ) )
@@ -82,7 +82,8 @@ namespace SkubanaAccess.Services.Products
 						break;
 					}
 
-					result.AddRange( response.Select( r => r.ToSVProduct() ) );
+					result.AddRange( response.Where( p => p.Type == ProductType.CoreProduct.Type )
+										.Select( r => r.ToSVProduct() ) );
 					++page;
 				}
 			}
