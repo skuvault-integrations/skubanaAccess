@@ -37,5 +37,20 @@ namespace SkubanaAccessTests
 			var products = await this._productService.GetProductsBySkus( skus, CancellationToken.None );
 			products.Should().BeNullOrEmpty();
 		}
+
+		[ Test ]
+		public async Task GetProductsUpdatedAfter()
+		{
+			var products = await this._productService.GetProductsUpdatedAfterAsync( DateTime.UtcNow.AddMonths( -1 ), CancellationToken.None );
+			products.Should().NotBeNullOrEmpty();
+		}
+
+		[ Test ]
+		public async Task GetProductsUpdateAfterUsingSmallPage()
+		{
+			base.Config.RetrieveProductsPageSize = 1;
+			var products = await this._productService.GetProductsUpdatedAfterAsync( DateTime.UtcNow.AddMonths( -1 ), CancellationToken.None );
+			products.Should().NotBeNullOrEmpty();
+		}
 	}
 }

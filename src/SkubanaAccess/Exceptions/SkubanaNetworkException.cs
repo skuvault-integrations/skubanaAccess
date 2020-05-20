@@ -12,4 +12,9 @@ namespace SkubanaAccess.Exceptions
 	{
 		public SkubanaUnauthorizedException( string message ) : base( message) { }
 	}
+
+	public class SkubanaRequestQuotaExceeded : SkubanaNetworkException
+	{
+		public SkubanaRequestQuotaExceeded( string message ) : base( message ) { }
+	}
 }
