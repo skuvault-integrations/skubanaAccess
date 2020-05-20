@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 namespace SkubanaAccess.Shared
@@ -52,6 +53,22 @@ namespace SkubanaAccess.Shared
 				i += chunkSize;
 			}
 			return chunks;
+		}
+
+		public static DateTime ConvertStrToDateTime( this string str )
+		{
+			if ( string.IsNullOrEmpty( str ) )
+				return DateTime.MinValue;
+
+			if ( DateTime.TryParseExact( str, "yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime result ) )
+				return result;
+			
+			return DateTime.MinValue;
+		}
+
+		public static string ConvertDateTimeToStr( this DateTime date )
+		{
+			return date.ToString( "yyyy-MM-ddTHH:mm:ssZ" );
 		}
 	}
 }

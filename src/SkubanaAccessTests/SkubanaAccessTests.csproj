@@ -70,6 +70,8 @@
     <Compile Include="BaseTest.cs" />
     <Compile Include="GlobalTests.cs" />
     <Compile Include="InventoryTests.cs" />
+    <Compile Include="OrderMapperTests.cs" />
+    <Compile Include="OrdersTests.cs" />
     <Compile Include="ProductMapperTests.cs" />
     <Compile Include="ProductsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
