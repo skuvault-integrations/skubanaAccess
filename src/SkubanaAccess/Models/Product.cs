@@ -54,12 +54,6 @@ namespace SkubanaAccess.Models
 		public IEnumerable< ProductAttributeGroup > AttributeGroups { get; set; }
 	}
 
-	public class Money
-	{
-		public decimal Amount { get; set; }
-		public string Currency { get; set; }
-	}
-
 	public class ProductImage
 	{
 		[ JsonProperty( "id" ) ]

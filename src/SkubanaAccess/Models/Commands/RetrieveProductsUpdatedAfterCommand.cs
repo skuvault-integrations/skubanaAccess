@@ -1,5 +1,6 @@
 ﻿using CuttingEdge.Conditions;
 using SkubanaAccess.Configuration;
+using SkubanaAccess.Shared;
 using System;
 using System.Collections.Generic;
 
@@ -14,7 +15,7 @@ namespace SkubanaAccess.Models.Commands
 
 			this.RequestParameters = new Dictionary< string, string >()
 			{
-				{ "modifiedDateFrom", updatedAfterUtc.ToString( "yyyy-MM-ddTHH:mm:ssZ" ) },
+				{ "modifiedDateFrom", updatedAfterUtc.ConvertDateTimeToStr() },
 				{ "page", page.ToString() },
 				{ "limit", limit.ToString() }
 			};
