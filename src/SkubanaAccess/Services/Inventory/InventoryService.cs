@@ -14,6 +14,8 @@ namespace SkubanaAccess.Services.Inventory
 {
 	public class InventoryService : ServiceBaseWithTokenAuth, IInventoryService
 	{
+		public const string Warehouse3PLLocationName = "GLOBAL";
+
 		public InventoryService( SkubanaConfig config ) : base( config )
 		{
 		}
@@ -21,13 +23,14 @@ namespace SkubanaAccess.Services.Inventory
 		/// <summary>
 		///	Adjust products stocks quantities, will override existing quantities.
 		///	This endpoint should be used carefully as it might override pending activity.
+		///	Product's stock should already exists.
 		/// </summary>
-		/// <param name="skusQuantities"></param>
+		/// <param name="skusQuantitiesByLocation"></param>
 		/// <param name="warehouseId"></param>
 		/// <param name="token"></param>
 		/// <param name="mark"></param>
 		/// <returns></returns>
-		public async Task< AdjustProductStockQuantityResponse > AdjustProductsStockQuantities( Dictionary< string, int > skusQuantities, long warehouseId, CancellationToken token, Mark mark = null )
+		private async Task< AdjustProductStockQuantityResponse > AdjustProductsStockQuantities( IEnumerable< SkubanaProductStock > skusQuantities, long warehouseId, CancellationToken token, Mark mark = null )
 		{
 			if ( mark == null )
 				mark = Mark.CreateNew();
@@ -59,7 +62,16 @@ namespace SkubanaAccess.Services.Inventory
 						{
 							if ( error.ErrorCode == SkubanaValidationErrors.ProductStockNotFound.Code )
 							{
-								result.ProductsWithoutStocks.Add( error.Identifier );
+								var locationWithoutStock = chunk[ error.Index - 1 ].LocationName;
+
+								if ( result.ProductsWithoutStocks.TryGetValue( chunk[ error.Index - 1 ].ProductSku, out List< string > locations ) )
+								{
+									locations.Add( locationWithoutStock );
+								}
+								else
+								{
+									result.ProductsWithoutStocks.Add( chunk[ error.Index - 1 ].ProductSku, new List< string >(){ { locationWithoutStock } } );
+								}
 							}
 							else if ( error.ErrorCode == SkubanaValidationErrors.ProductDoesNotExist.Code )
 							{
@@ -83,6 +95,7 @@ namespace SkubanaAccess.Services.Inventory
 		/// <summary>
 		///	Adjust product stock quantities, will override existing quantities.
 		///	This endpoint should be used carefully as it might override pending activity.
+		///	Execute this method only against 3PL warehouse without locations.
 		/// </summary>
 		/// <param name="sku"></param>
 		/// <param name="quantity"></param>
@@ -90,25 +103,84 @@ namespace SkubanaAccess.Services.Inventory
 		/// <param name="token"></param>
 		/// <param name="mark"></param>
 		/// <returns></returns>
-		public Task< AdjustProductStockQuantityResponse > AdjustProductStockQuantity( string sku, int quantity, long warehouseId, CancellationToken token, Mark mark = null )
+		public Task< AdjustProductStockQuantityResponse > AdjustProductStockQuantityTo3PLWarehouse( string sku, int quantity, long warehouseId, CancellationToken token, Mark mark = null )
 		{
-			var skusQuantities = new Dictionary< string, int >()
+			var skusQuantities = new List< SkubanaProductStock >()
 			{
-				{ sku, quantity }
+				{ new SkubanaProductStock() { ProductSku = sku, LocationName = Warehouse3PLLocationName, OnHandQuantity = quantity } }
 			};
 
 			return AdjustProductsStockQuantities( skusQuantities, warehouseId, token, mark );
 		}
 
 		/// <summary>
-		///	Create products stocks with default global location
+		///	Adjust product stock quantities, will override existing quantities.
+		///	This endpoint should be used carefully as it might override pending activity.
+		///	Execute this method only against 3PL warehouse without locations.
+		/// </summary>
+		/// <param name="skusQuantities"></param>
+		/// <param name="warehouseId"></param>
+		/// <param name="token"></param>
+		/// <param name="mark"></param>
+		/// <returns></returns>
+		public Task< AdjustProductStockQuantityResponse > AdjustProductsStockQuantitiesTo3PLWarehouse( Dictionary< string, int > skusQuantities, long warehouseId, CancellationToken token, Mark mark = null )
+		{
+			var skusQuantitiesWithGlobalLocation = new List< SkubanaProductStock >();
+
+			foreach( var skuQuantity in skusQuantities )
+			{
+				skusQuantitiesWithGlobalLocation.Add( new SkubanaProductStock() { ProductSku = skuQuantity.Key, LocationName = Warehouse3PLLocationName, OnHandQuantity = skuQuantity.Value } );
+			}
+
+			return AdjustProductsStockQuantities( skusQuantitiesWithGlobalLocation, warehouseId, token, mark );
+		}
+
+		/// <summary>
+		///	Adjust product stock quantities, will override existing quantities.
+		///	This endpoint should be used carefully as it might override pending activity.
+		///	Execute this method only against InHouse warehouse with locations.
+		/// </summary>
+		/// <param name="sku"></param>
+		/// <param name="quantity"></param>
+		/// <param name="warehouseId"></param>
+		/// <param name="locationName"></param>
+		/// <param name="token"></param>
+		/// <param name="mark"></param>
+		/// <returns></returns>
+		public Task< AdjustProductStockQuantityResponse > AdjustProductStockQuantityToInHouseWarehouse( string sku, int quantity, long warehouseId, string locationName, CancellationToken token, Mark mark = null )
+		{
+			var skusQuantities = new List< SkubanaProductStock >()
+			{
+				{ new SkubanaProductStock() { ProductSku = sku, LocationName = locationName, OnHandQuantity = quantity } }
+			};
+
+			return AdjustProductsStockQuantities( skusQuantities, warehouseId, token, mark );
+		}
+
+		/// <summary>
+		///	Adjust products stocks quantities, will override existing quantities.
+		///	This endpoint should be used carefully as it might override pending activity.
+		///	Product's stock should already exists.
+		/// </summary>
+		/// <param name="skusQuantitiesByLocation"></param>
+		/// <param name="warehouseId"></param>
+		/// <param name="token"></param>
+		/// <param name="mark"></param>
+		/// <returns></returns>
+		public Task< AdjustProductStockQuantityResponse > AdjustProductsStockQuantitiesToInHouseWarehouse( IEnumerable< SkubanaProductStock > skusQuantitiesByLocation, long warehouseId, CancellationToken token, Mark mark = null )
+		{
+			return AdjustProductsStockQuantities( skusQuantitiesByLocation, warehouseId, token, mark );
+		}
+
+		/// <summary>
+		///	Create products stocks
 		/// </summary>
 		/// <param name="productsQuantities"></param>
 		/// <param name="warehouseId"></param>
 		/// <param name="token"></param>
 		/// <param name="mark"></param>
 		/// <returns></returns>
-		public async Task CreateProductsStock( Dictionary< long, int > productsQuantities, long warehouseId, CancellationToken token, Mark mark = null )
+		private async Task CreateProductsStock( IEnumerable< SkubanaProductStock > productsStock, long warehouseId, CancellationToken token, Mark mark = null )
 		{
 			if ( mark == null )
 				mark = Mark.CreateNew();
@@ -119,7 +191,7 @@ namespace SkubanaAccess.Services.Inventory
 				SkubanaLogger.LogTraceException( new SkubanaException( string.Format( "{0}. Create products stocks request was cancelled", exceptionDetails ) ) );
 			}
 
-			var chunks = productsQuantities.SplitToChunks( base.Config.CreateProductStockBatchSize );
+			var chunks = productsStock.SplitToChunks( base.Config.CreateProductStockBatchSize );
 
 			using( var throttler = new Throttler( 1, 30 ) )
 			{
@@ -140,24 +212,83 @@ namespace SkubanaAccess.Services.Inventory
 		}
 
 		/// <summary>
-		///	Create product stock with default global location
+		///	Create product stock in 3PL warehouse with default global location
 		/// </summary>
 		/// <param name="sku"></param>
 		/// <param name="warehouseId"></param>
 		/// <param name="token"></param>
 		/// <param name="mark"></param>
 		/// <returns></returns>
-		public Task CreateProductStock( long productId, int quantity, long warehouseId, CancellationToken token, Mark mark = null )
+		public Task CreateProductStockIn3PLWarehouse( long productId, int quantity, long warehouseId, CancellationToken token, Mark mark = null )
 		{
-			var productsQuantities = new Dictionary< long, int >()
+			var productsQuantities = new List< SkubanaProductStock >()
 			{
-				{ productId, quantity }
+				{ new SkubanaProductStock() { ProductId = productId, LocationName = Warehouse3PLLocationName, OnHandQuantity = quantity } }
 			};
 
 			return CreateProductsStock( productsQuantities, warehouseId, token, mark );
 		}
 
-		public async Task< IEnumerable< ProductStock > > GetProductsStock( long warehouseId, CancellationToken token, Mark mark = null )
+		/// <summary>
+		///	Create products stocks in 3PL warehouse with default global location
+		/// </summary>
+		/// <param name="productsQuantities"></param>
+		/// <param name="warehouseId"></param>
+		/// <param name="token"></param>
+		/// <param name="mark"></param>
+		/// <returns></returns>
+		public Task CreateProductsStockIn3PLWarehouse( Dictionary< long, int > productsQuantities, long warehouseId, CancellationToken token, Mark mark = null )
+		{
+			var productsStock = new List< SkubanaProductStock >();
+			foreach( var productQuantity in productsQuantities )
+			{
+				productsStock.Add( new SkubanaProductStock() { ProductId = productQuantity.Key, OnHandQuantity = productQuantity.Value, LocationName = Warehouse3PLLocationName } );
+			}
+
+			return CreateProductsStock( productsStock, warehouseId, token, mark );
+		}
+
+		/// <summary>
+		///	
+		/// </summary>
+		/// <param name="productsStocks"></param>
+		/// <param name="warehouseId"></param>
+		/// <param name="token"></param>
+		/// <param name="mark"></param>
+		/// <returns></returns>
+		public Task CreateProductStockInInHouseWarehouse( long productId, int quantity, long warehouseId, string locationName, CancellationToken token, Mark mark = null )
+		{
+			var productsQuantities = new List< SkubanaProductStock >()
+			{
+				{ new SkubanaProductStock() { ProductId = productId, LocationName = locationName, OnHandQuantity = quantity } }
+			};
+
+			return CreateProductsStock( productsQuantities, warehouseId, token, mark );
+		}
+
+		/// <summary>
+		///	Create products stock in InHouse warehouse
+		/// </summary>
+		/// <param name="productsStocks"></param>
+		/// <param name="warehouseId"></param>
+		/// <param name="token"></param>
+		/// <param name="mark"></param>
+		/// <returns></returns>
+		public Task CreateProductsStockInInHouseWarehouse( IEnumerable< SkubanaProductStock > productsStocks, long warehouseId, CancellationToken token, Mark mark = null )
+		{
+			return CreateProductsStock( productsStocks, warehouseId, token, mark );
+		}
+
+		/// <summary>
+		///	Retrieve products stock totals. 
+		///	This is the physical inventory count present (e.g. it does not include potentially buildable bundles or kits). 
+		///	In transit quantity does not include pending Purchase Orders.
+		/// </summary>
+		/// <param name="warehouseId"></param>
+		/// <param name="token"></param>
+		/// <param name="mark"></param>
+		/// <returns></returns>
+		public async Task< IEnumerable< SkubanaProductStock > > GetProductsStock( long warehouseId, CancellationToken token, Mark mark = null )
 		{
 			if ( mark == null )
 				mark = Mark.CreateNew();
@@ -168,7 +299,7 @@ namespace SkubanaAccess.Services.Inventory
 				SkubanaLogger.LogTraceException( new SkubanaException( string.Format( "{0}. Get products stock total request was cancelled", exceptionDetails ) ) );
 			}
 
-			var productsStock = new List< ProductStock >();
+			var productsStock = new List< SkubanaProductStock >();
 			int pageIndex = 1;
 
 			using( var throttler = new Throttler( 10, 1 ) )
@@ -188,7 +319,7 @@ namespace SkubanaAccess.Services.Inventory
 					}
 
 					++pageIndex;
-					productsStock.AddRange( pageData );
+					productsStock.AddRange( pageData.Select( p => new SkubanaProductStock() { ProductId = p.Product.Id, OnHandQuantity = p.OnHandQuantity } ) );
 				}
 			}
 
@@ -196,16 +327,14 @@ namespace SkubanaAccess.Services.Inventory
 		}
 
 		/// <summary>
-		///	Retrieve products stock totals. 
-		///	This is the physical inventory count present (e.g. it does not include potentially buildable bundles or kits). 
-		///	In transit quantity does not include pending Purchase Orders.
+		///	Retrieve product stock.
 		/// </summary>
 		/// <param name="sku"></param>
 		/// <param name="warehouseId"></param>
 		/// <param name="token"></param>
 		/// <param name="mark"></param>
 		/// <returns></returns>
-		public async Task< ProductStock > GetProductStock( string sku, long warehouseId, CancellationToken token, Mark mark = null )
+		public async Task< SkubanaProductStock > GetProductStock( string sku, long warehouseId, CancellationToken token, Mark mark = null )
 		{
 			if ( mark == null )
 				mark = Mark.CreateNew();
@@ -216,10 +345,42 @@ namespace SkubanaAccess.Services.Inventory
 				SkubanaLogger.LogTraceException( new SkubanaException( string.Format( "{0}. Retrieve product stock total request was cancelled", exceptionDetails ) ) );
 			}
 
-			using( var command = new GetProductStockTotalCommand( base.Config, sku, warehouseId ){ Throttler = new Throttler( 10, 1 ) } )
+			using( var throttler = new Throttler( 10, 1 ) )
 			{
-				var stock = await base.GetAsync< IEnumerable< ProductStock > >( command, token, mark ).ConfigureAwait( false );
-				return stock.FirstOrDefault();
+				using( var command = new GetProductStockTotalCommand( base.Config, sku, warehouseId ){ Throttler = throttler } )
+				{
+					var stock = await base.GetAsync< IEnumerable< ProductStock > >( command, token, mark ).ConfigureAwait( false );
+					return stock.Select( s => new SkubanaProductStock() { ProductId = s.Product.Id, OnHandQuantity = s.OnHandQuantity } ).FirstOrDefault();
+				}
+			}
+		}
+
+		/// <summary>
+		///	Retrieve product stock broke down by location
+		/// </summary>
+		/// <param name="sku"></param>
+		/// <param name="warehouseId"></param>
+		/// <param name="token"></param>
+		/// <param name="mark"></param>
+		/// <returns></returns>
+		public async Task< IEnumerable< SkubanaProductStock > > GetDetailedProductStock( string sku, long warehouseId, CancellationToken token, Mark mark = null )
+		{
+			if ( mark == null )
+				mark = Mark.CreateNew();
+
+			if ( token.IsCancellationRequested )
+			{
+				var exceptionDetails = CreateMethodCallInfo( base.Config.Environment.BaseApiUrl, mark, additionalInfo: this.AdditionalLogInfo() );
+				SkubanaLogger.LogTraceException( new SkubanaException( string.Format( "{0}. Retrieve product detailed stock request was cancelled", exceptionDetails ) ) );
+			}
+
+			using( var throttler = new Throttler( 5, 1 ) )
+			{
+				using( var command = new GetProductStockCommand( base.Config, sku, warehouseId ){ Throttler = throttler } )
+				{
+					var stock = await base.GetAsync< IEnumerable< DetailedProductStock > >( command, token, mark ).ConfigureAwait( false );
+					return stock.Select( s => new SkubanaProductStock() { ProductId = s.Product.Id, OnHandQuantity = s.Quantity, LocationName = s.Location.LocationName } );
+				}
 			}
 		}
 	}

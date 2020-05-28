@@ -101,5 +101,6 @@ namespace SkubanaAccess.Models.Commands
 		public const string RetrieveProductsUrl = "/v1.1/products";
 		public const string ListWarehousesUrl = "/v1/warehouses";
 		public const string RetrieveOrdersUrl = "/v1.1/orders";
+		public const string RetrieveProductStockUrl = "/v1/inventory";
 	}
 }

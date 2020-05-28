@@ -10,5 +10,7 @@ namespace SkubanaAccess.Models.RequestBody
 		public int OnHandQuantity { get; set; }
 		[ JsonProperty( "warehouseId" ) ]
 		public long WarehouseId { get; set; }
+		[ JsonProperty( "stockLocationName" ) ]
+		public string StockLocationName { get; set; }
 	}
 }
