@@ -319,7 +319,7 @@ namespace SkubanaAccess.Services.Inventory
 					}
 
 					++pageIndex;
-					productsStock.AddRange( pageData.Select( p => new SkubanaProductStock() { ProductId = p.Product.Id, OnHandQuantity = p.OnHandQuantity } ) );
+					productsStock.AddRange( pageData.Select( p => new SkubanaProductStock() { ProductId = p.Product.Id, ProductSku = p.Product.Sku, OnHandQuantity = p.OnHandQuantity } ) );
 				}
 			}
 
@@ -350,7 +350,7 @@ namespace SkubanaAccess.Services.Inventory
 				using( var command = new GetProductStockTotalCommand( base.Config, sku, warehouseId ){ Throttler = throttler } )
 				{
 					var stock = await base.GetAsync< IEnumerable< ProductStock > >( command, token, mark ).ConfigureAwait( false );
-					return stock.Select( s => new SkubanaProductStock() { ProductId = s.Product.Id, OnHandQuantity = s.OnHandQuantity } ).FirstOrDefault();
+					return stock.Select( s => new SkubanaProductStock() { ProductId = s.Product.Id, ProductSku = s.Product.Sku, OnHandQuantity = s.OnHandQuantity } ).FirstOrDefault();
 				}
 			}
 		}
@@ -379,7 +379,7 @@ namespace SkubanaAccess.Services.Inventory
 				using( var command = new GetProductStockCommand( base.Config, sku, warehouseId ){ Throttler = throttler } )
 				{
 					var stock = await base.GetAsync< IEnumerable< DetailedProductStock > >( command, token, mark ).ConfigureAwait( false );
-					return stock.Select( s => new SkubanaProductStock() { ProductId = s.Product.Id, OnHandQuantity = s.Quantity, LocationName = s.Location.LocationName } );
+					return stock.Select( s => new SkubanaProductStock() { ProductId = s.Product.Id, ProductSku = s.Product.Sku, OnHandQuantity = s.Quantity, LocationName = s.Location.LocationName } );
 				}
 			}
 		}
