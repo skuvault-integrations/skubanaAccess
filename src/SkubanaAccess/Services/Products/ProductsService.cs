@@ -44,7 +44,9 @@ namespace SkubanaAccess.Services.Products
 
 					if ( response != null )
 					{
-						result.AddRange( response.Select( r => r.ToSVProduct() ) );
+						// Skubana product search isn't strict
+						var products = response.Select( r => r.ToSVProduct() ).Where( p => chunk.Any( c => c.ToLower().Equals( p.Sku.ToLower() ) ) ).ToList();
+						result.AddRange( products );
 					}
 				}
 			}

@@ -31,6 +31,14 @@ namespace SkubanaAccessTests
 		}
 
 		[ Test ]
+		public async Task GetProductsBySkusWhereSearchSkuIsPartOfAnotherSkuInCatalog()
+		{
+			var skus = new string[] { "SB-comp" };
+			var products = await this._productService.GetProductsBySkus( skus, CancellationToken.None );
+			products.Count().Should().Be( 1 );
+		}
+
+		[ Test ]
 		public async Task GetProductThatNotExists()
 		{
 			var skus = new string[] { "SB-" + Guid.NewGuid().ToString() };
