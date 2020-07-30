@@ -4,6 +4,7 @@ using SkubanaAccess.Services.Global;
 using SkubanaAccess.Services.Inventory;
 using SkubanaAccess.Services.Orders;
 using SkubanaAccess.Services.Products;
+using SkubanaAccess.Services.PurchaseOrders;
 
 namespace SkubanaAccess
 {
@@ -14,5 +15,6 @@ namespace SkubanaAccess
 		IProductsService CreateProductsService( SkubanaConfig config );
 		IGlobalService CreateGlobalService( SkubanaConfig config );
 		IOrdersService CreateOrdersService( SkubanaConfig config );
+		IPurchaseOrdersService CreatePurchaseOrdersService(SkubanaConfig config);
 	}
 }

@@ -5,6 +5,7 @@ using SkubanaAccess.Services.Global;
 using SkubanaAccess.Services.Inventory;
 using SkubanaAccess.Services.Orders;
 using SkubanaAccess.Services.Products;
+using SkubanaAccess.Services.PurchaseOrders;
 
 namespace SkubanaAccess
 {
@@ -33,6 +34,11 @@ namespace SkubanaAccess
 		public IOrdersService CreateOrdersService( SkubanaConfig config )
 		{
 			return new OrdersService( config );
+		}
+
+		public IPurchaseOrdersService CreatePurchaseOrdersService( SkubanaConfig config )
+		{
+			return new PurchaseOrdersService( config );
 		}
 	}
 }

@@ -75,6 +75,8 @@
     <Compile Include="ProductMapperTests.cs" />
     <Compile Include="ProductsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PurchaseOrdersMappersTests.cs" />
+    <Compile Include="PurchaseOrdersTests.cs" />
     <Compile Include="TestCredentials.cs" />
   </ItemGroup>
   <ItemGroup>
