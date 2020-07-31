@@ -6,9 +6,9 @@ using SkubanaAccess.Shared;
 
 namespace SkubanaAccess.Models.Commands
 {
-	public class RetrievePurchaseOrdersCommand : SkubanaCommand
+	public class RetrievePOsCreatedBetweenDatesCommand : SkubanaCommand
 	{
-		public RetrievePurchaseOrdersCommand( SkubanaConfig config, DateTime startDateUtc, DateTime endDateUtc, int page, int limit ) : base( config, SkubanaEndpoint.RetrievePurchaseOrdersUrl )
+		public RetrievePOsCreatedBetweenDatesCommand( SkubanaConfig config, DateTime startDateUtc, DateTime endDateUtc, int page, int limit ) : base( config, SkubanaEndpoint.RetrievePurchaseOrdersUrl )
 		{		
 			Condition.Requires( endDateUtc, "endDateUtc" ).IsGreaterThan( startDateUtc );
 			Condition.Requires( page, "page" ).IsGreaterOrEqual( 1 );
@@ -16,8 +16,8 @@ namespace SkubanaAccess.Models.Commands
 
 			this.RequestParameters = new Dictionary< string, string >()
 			{
-				{ "modifiedDateFrom", startDateUtc.ConvertDateTimeToStr() },
-				{ "modifiedDateTo", endDateUtc.ConvertDateTimeToStr() },
+				{ "createdDateFrom", startDateUtc.ConvertDateTimeToStr() },
+				{ "createdDateTo", endDateUtc.ConvertDateTimeToStr() },
 				{ "page", page.ToString() },
 				{ "limit", limit.ToString() }
 			};

@@ -64,6 +64,11 @@ namespace SkubanaAccess.Models.Commands
 		{
 		}
 
+		protected SkubanaCommand( SkubanaConfig config, string relativeUrl, string routeId ) 
+			: this( config, relativeUrl + routeId, null, null )
+		{
+		}
+
 		protected SkubanaCommand( SkubanaConfig config, string relativeUrl, object payload ) : this( config, relativeUrl, null, payload )
 		{
 		}
@@ -103,5 +108,6 @@ namespace SkubanaAccess.Models.Commands
 		public const string RetrieveOrdersUrl = "/v1.1/orders";
 		public const string RetrievePurchaseOrdersUrl = "/v1.1/purchaseorders";
 		public const string RetrieveProductStockUrl = "/v1/inventory";
+		public const string GetVendorByIdUrl = "/v1/vendor/";
 	}
 }

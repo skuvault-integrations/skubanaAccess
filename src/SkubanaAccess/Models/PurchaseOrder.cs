@@ -213,6 +213,7 @@ namespace SkubanaAccess.Models
 		public long Id { get; set; }
 		public string Currency { get; set; }
 		public DateTime DateCreatedUtc { get; set; }
+		public DateTime? DateModifiedUtc { get; set; }
 		public long DestinationWarehouseId { get; set; }
 		public string InternalNotes { get; set; }
 		public string Number { get; set; }
@@ -222,8 +223,9 @@ namespace SkubanaAccess.Models
 		public Money ShippingCost { get; set; }
 		public SkubanaPOStatusEnum Status { get; set; }
 		public long VendorId { get; set; }
+		public string VendorName { get; set; }
 		public string PaymentTerm { get; set; }
-		public long AuthorizerUserId { get; set; }
+		public long? AuthorizerUserId { get; set; }
 	}
 
 	public class SkubanaPurchaseOrderItem
@@ -245,9 +247,10 @@ namespace SkubanaAccess.Models
 			return new SkubanaPurchaseOrder
 			{
 				Id = purchaseOrder.Id,
-				AuthorizerUserId = purchaseOrder.Authorizer.UserId,
+				AuthorizerUserId = purchaseOrder.Authorizer?.UserId,
 				Currency = purchaseOrder.Currency,
 				DateCreatedUtc = purchaseOrder.DateCreated.ConvertStrToDateTime().ToUniversalTime(),
+				DateModifiedUtc = purchaseOrder.DateModified?.ConvertStrToDateTime().ToUniversalTime(),
 				DestinationWarehouseId = purchaseOrder.DestinationWarehouseId,
 				InternalNotes = purchaseOrder.InternalNotes,
 				Number = purchaseOrder.Number,
@@ -261,7 +264,7 @@ namespace SkubanaAccess.Models
 				ShippingCost = purchaseOrder.ShippingCost,
 				Status = purchaseOrder.Status.ToEnum< SkubanaPOStatusEnum >( SkubanaPOStatusEnum.Undefined ),
 				VendorId = purchaseOrder.VendorId,
-				PaymentTerm = purchaseOrder.PaymentTerm?.Active ?? false ? purchaseOrder.PaymentTerm.Description : ""
+				PaymentTerm = purchaseOrder.PaymentTerm?.Description ?? ""
 			};
 		}
 
@@ -302,5 +305,24 @@ namespace SkubanaAccess.Models
 	{
 		public string Description { get; set; }
 		public Money Amount { get; set; }
+	}
+
+	public class PurchaseOrderComparer : IEqualityComparer< SkubanaPurchaseOrder >
+	{
+		public bool Equals( SkubanaPurchaseOrder x, SkubanaPurchaseOrder y )
+		{
+			if( ReferenceEquals( x, null ) )
+				return false;
+			if( ReferenceEquals( null, y ) )
+				return false;
+			if( ReferenceEquals( x, y ) )
+				return true;
+			return x.Id == y.Id;
+		}
+
+		public int GetHashCode( SkubanaPurchaseOrder obj )
+		{
+			return ( int ) obj.Id;
+		}
 	}
 }
