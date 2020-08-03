@@ -95,6 +95,7 @@ namespace SkubanaAccessTests
 		[ Test ]
 		public void ToSVPurchaseOrderItem()
 		{
+			const string vendorSku = "testSku43";
 			const string memo = "memo1";
 			const int quantity = 9;
 			const long itemId = 323;
@@ -111,6 +112,7 @@ namespace SkubanaAccessTests
 			const string referenceNumber = "123123";
 			var purchaseOrderItem = new PurchaseOrderItem
 			{
+				VendorProductVendorSku = vendorSku,
 				Memo = memo,
 				Quantity = quantity,
 				PurchaseOrderItemId = itemId,
@@ -121,6 +123,7 @@ namespace SkubanaAccessTests
 
 			var result = purchaseOrderItem.ToSVPurchaseOrderItem();
 
+			result.VendorSku.Should().Be( vendorSku );
 			result.Memo.Should().Be( memo );
 			result.Quantity.Should().Be( quantity );
 			result.ItemId.Should().Be( itemId );

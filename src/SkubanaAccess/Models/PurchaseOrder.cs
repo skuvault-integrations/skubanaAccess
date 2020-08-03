@@ -230,6 +230,7 @@ namespace SkubanaAccess.Models
 
 	public class SkubanaPurchaseOrderItem
 	{
+		public string VendorSku { get; set; }
 		public long ItemId { get; set; }
 		public Money BilledUnitCost { get; set; }
 		public string Memo { get; set; }
@@ -273,6 +274,7 @@ namespace SkubanaAccess.Models
 			return new SkubanaPurchaseOrderItem
 			{
 				ItemId = item.PurchaseOrderItemId,
+				VendorSku = item.VendorProductVendorSku,
 				BilledUnitCost = item.BilledUnitCost,
 				Memo = item.Memo,
 				OriginalUnitCost = item.OriginalUnitCost,
