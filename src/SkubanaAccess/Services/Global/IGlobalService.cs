@@ -10,5 +10,6 @@ namespace SkubanaAccess.Services.Global
 	public interface IGlobalService : IDisposable
 	{
 		Task< IEnumerable< SkubanaWarehouse > > ListWarehouses( CancellationToken token, Mark mark = null );
+		Task< SkubanaWarehouse > GetWarehouseByIdAsync( long warehouseId, CancellationToken token, Netco.Logging.Mark mark );
 	}
 }

@@ -37,6 +37,8 @@ namespace SkubanaAccessTests
 			const string customPONumber = "1j3k123j2";
 			const string dateCreated = "2020-07-02T19:46:10Z";
 			var dateCreatedUtc = new DateTime( 2020, 07, 02, 19, 46, 10, DateTimeKind.Utc );
+			const string dateModified = "2020-07-03T11:26:10Z";;
+			var dateModifiedUtc = new DateTime( 2020, 07, 03, 11, 26, 10, DateTimeKind.Utc );
 			const long destinationWarehouseId = 31;
 			const string poNumber = "23434431";
 			const string status = "AWAITING_VENDOR_CONFIRMATION";
@@ -60,6 +62,7 @@ namespace SkubanaAccessTests
 				ShippingCost = shippingCost,
 				CustomPurchaseOrderNumber = customPONumber,
 				DateCreated = dateCreated,
+				DateModified = dateModified,
 				DestinationWarehouseId = destinationWarehouseId,
 				Number = poNumber,
 				Status = status,
@@ -80,6 +83,7 @@ namespace SkubanaAccessTests
 			result.ShippingCost.Should().Be( shippingCost );
 			result.CustomPurchaseOrderNumber.Should().Be( customPONumber );
 			result.DateCreatedUtc.Should().Be( dateCreatedUtc );
+			result.DateModifiedUtc.Should().Be( dateModifiedUtc );
 			result.DestinationWarehouseId.Should().Be( destinationWarehouseId );
 			result.Number.Should().Be( poNumber );
 			result.Status.Should().Be( SkubanaPOStatusEnum.AWAITING_VENDOR_CONFIRMATION );

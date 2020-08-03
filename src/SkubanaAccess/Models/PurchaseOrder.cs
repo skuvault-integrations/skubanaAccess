@@ -58,7 +58,7 @@ namespace SkubanaAccess.Models
 		public object AssignedPurchaseOrderMilestones { get; set; }
 
 		[ JsonProperty( "messagesToVendor" ) ]
-		public object MessagesToVendor { get; set; }
+		public object MessagesToVendor { get; set; }	//Not using because api always returns as empty
 
 		[ JsonProperty( "shippingCost" ) ] 
 		public Money ShippingCost { get; set; }

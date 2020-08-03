@@ -3,6 +3,7 @@ using NUnit.Framework;
 using SkubanaAccess.Services.Global;
 using System.Threading;
 using System.Threading.Tasks;
+using Netco.Logging;
 
 namespace SkubanaAccessTests
 {
@@ -21,7 +22,18 @@ namespace SkubanaAccessTests
 		public async Task ListWarehouses()
 		{
 			var warehouses = await this._globalService.ListWarehouses( CancellationToken.None );
+
 			warehouses.Should().NotBeNullOrEmpty();
+		}
+
+		[ Test ]
+		public async Task GetWarehouseByIdAsync()
+		{
+			const int warehouseId = 107178;
+
+			var warehouse = await this._globalService.GetWarehouseByIdAsync( warehouseId, CancellationToken.None, Mark.Blank() );
+
+			warehouse.Name.Should().Be( "SkuVault" );
 		}
 	}
 }

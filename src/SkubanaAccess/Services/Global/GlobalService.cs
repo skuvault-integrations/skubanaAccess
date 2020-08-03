@@ -33,5 +33,22 @@ namespace SkubanaAccess.Services.Global
 				return response.Select( r => r.ToSVWarehouse() );
 			}
 		}
+
+		public async Task< SkubanaWarehouse > GetWarehouseByIdAsync( long warehouseId, CancellationToken token, Netco.Logging.Mark mark )
+		{
+			var skubanaMark = new Mark( mark.MarkValue );
+
+			if ( token.IsCancellationRequested )
+			{
+				var exceptionDetails = CreateMethodCallInfo( base.Config.Environment.BaseApiUrl, skubanaMark, additionalInfo: this.AdditionalLogInfo() );
+				SkubanaLogger.LogTraceException( new SkubanaException( string.Format( "{0}. Get warehouse by id request was cancelled", exceptionDetails ) ) );
+			}
+
+			using ( var command = new GetWarehouseByIdCommand( base.Config, warehouseId ) )
+			{
+				var response = await base.GetAsync< Warehouse >( command, token, skubanaMark );
+				return response.ToSVWarehouse();
+			}
+		}
 	}
 }
