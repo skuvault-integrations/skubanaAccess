@@ -108,7 +108,10 @@ namespace SkubanaAccess.Models.Commands
 		public const string GetWarehouseByIdUrl = "//v1/warehouse/";
 		public const string RetrieveOrdersUrl = "/v1.1/orders";
 		public const string RetrievePurchaseOrdersUrl = "/v1.1/purchaseorders";
+		public const string CreatePurchaseOrderUrl = "/v1/purchaseorder";
 		public const string RetrieveProductStockUrl = "/v1/inventory";
 		public const string GetVendorByIdUrl = "/v1/vendor/";
+		public const string GetAllVendorsUrl = "/v1/vendors";
+		public const string RetrieveVendorProductsUrl = "/v1/vendorproducts";
 	}
 }

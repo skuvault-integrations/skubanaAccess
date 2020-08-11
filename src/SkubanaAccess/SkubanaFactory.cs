@@ -38,7 +38,8 @@ namespace SkubanaAccess
 
 		public IPurchaseOrdersService CreatePurchaseOrdersService( SkubanaConfig config )
 		{
-			return new PurchaseOrdersService( config );
+			var productsService = CreateProductsService( config );
+			return new PurchaseOrdersService( config, productsService );
 		}
 	}
 }

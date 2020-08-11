@@ -7,7 +7,7 @@ using SkubanaAccess.Shared;
 
 namespace SkubanaAccess.Models
 {
-	public class PurchaseOrder
+	public class PurchaseOrder : PurchaseOrderBase
 	{
 		[ JsonProperty( "purchaseOrderId" ) ]
 		public long Id { get; set; }
@@ -18,83 +18,26 @@ namespace SkubanaAccess.Models
 		[ JsonProperty( "createdBy" ) ]
 		public User CreatedBy { get; set; }
 
-		[ JsonProperty( "currency") ]
-		public string Currency { get; set; }
-
-		[ JsonProperty( "dateAuthorized" ) ]
-		public string DateAuthorized { get; set; }
-
 		[ JsonProperty( "dateCreated" ) ]
 		public string DateCreated { get; set; }
 
 		[ JsonProperty( "dateModified" ) ]
 		public string DateModified { get; set; }
 
-		[ JsonProperty( "dateIssued" ) ]
-		public string DateIssued { get; set; }
-
-		[ JsonProperty( "destinationWarehouseId" ) ]
-		public long DestinationWarehouseId { get; set; }
-
-		[ JsonProperty( "format" ) ]
-		public string Format { get; set; }
-
-		[ JsonProperty( "internalNotes" ) ]
-		public string InternalNotes { get; set; }
-
 		[ JsonProperty( "number" ) ]
 		public string Number { get; set; }
-
-		[ JsonProperty( "customPurchaseOrderNumber" ) ]
-		public string CustomPurchaseOrderNumber { get; set; }
 
 		[ JsonProperty( "purchaseOrderItems" ) ]
 		public IEnumerable< PurchaseOrderItem > PurchaseOrderItems { get; set; }
 
-		[ JsonProperty( "otherCosts" ) ]
-		public IEnumerable< OtherCost > OtherCosts { get; set; }
-
-		[ JsonProperty( "assignedPurchaseOrderMilestones" ) ]
-		public object AssignedPurchaseOrderMilestones { get; set; }
-
-		[ JsonProperty( "messagesToVendor" ) ]
-		public object MessagesToVendor { get; set; }	//Not using because api always returns as empty
-
-		[ JsonProperty( "shippingCost" ) ] 
-		public Money ShippingCost { get; set; }
-
-		[ JsonProperty( "status" ) ]
-		public string Status { get; set; }
-
-		[ JsonProperty( "type" ) ]
-		public string Type { get; set; }
-
-		[ JsonProperty( "vendorConfirmByDate" ) ]
-		public string VendorConfirmByDate { get; set; }
-
-		[ JsonProperty( "vendorConfirmedOnDate" ) ]
-		public string VendorConfirmedOnDate { get; set; }
-
-		[ JsonProperty( "vendorId" ) ]
-		public long VendorId { get; set; }
-
 		[ JsonProperty( "incotermShippingRule" ) ]
 		public string IncotermShippingRule { get; set; }
 
-		[ JsonProperty( "incotermShippingRuleId" ) ]
-		public long IncotermShippingRuleId { get; set; }
-
 		[ JsonProperty( "paymentTerm" ) ] 
-		public PaymentTerm PaymentTerm { get; set; }
+		public VendorPaymentTerm VendorPaymentTerm { get; set; }
 
 		[ JsonProperty( "dropshipOrderId" ) ]
 		public long DropshipOrderId { get; set; }
-
-		[ JsonProperty( "purchaseOrderTemplateId" ) ]
-		public long PurchaseOrderTemplateId { get; set; }
-
-		[ JsonProperty( "autoUpdatesEnabled" ) ]
-		public bool AutoUpdatesEnabled { get; set; }
 	}
 
 	public class User
@@ -107,18 +50,6 @@ namespace SkubanaAccess.Models
 
 		[ JsonProperty( "userId" ) ]
 		public long UserId { get; set; }
-	}
-
-	public class PaymentTerm
-	{
-		[ JsonProperty( "vendorPaymentTermId" ) ]
-		public long VendorPaymentTermId { get; set; }
-
-		[ JsonProperty( "description" ) ]
-		public string Description { get; set; }
-
-		[ JsonProperty( "active" ) ]
-		public bool Active { get; set; }
 	}
 
 	public class OtherCost
@@ -219,13 +150,14 @@ namespace SkubanaAccess.Models
 		public string Number { get; set; }
 		public string CustomPurchaseOrderNumber { get; set; }
 		public IEnumerable< SkubanaPurchaseOrderItem > Items { get; set; }
-		public IEnumerable< SkubanaOtherCosts > OtherCosts { get; set; }
+		public IEnumerable< OtherCost > OtherCosts { get; set; }
 		public Money ShippingCost { get; set; }
 		public SkubanaPOStatusEnum Status { get; set; }
 		public long VendorId { get; set; }
-		public string VendorName { get; set; }
 		public string PaymentTerm { get; set; }
 		public long? AuthorizerUserId { get; set; }
+		public DateTime? VendorConfirmByDate { get; set; }
+		public SkubanaVendor Vendor { get; set; }
 	}
 
 	public class SkubanaPurchaseOrderItem
@@ -258,15 +190,11 @@ namespace SkubanaAccess.Models
 				Number = purchaseOrder.Number,
 				CustomPurchaseOrderNumber = purchaseOrder.CustomPurchaseOrderNumber,
 				Items = items.Select( i => i.ToSVPurchaseOrderItem() ),
-				OtherCosts = purchaseOrder.OtherCosts?.Select( o => new SkubanaOtherCosts
-				{
-					Description = o.Description,
-					Amount = o.Amount
-				} ),
+				OtherCosts = purchaseOrder.OtherCosts,
 				ShippingCost = purchaseOrder.ShippingCost,
-				Status = purchaseOrder.Status.ToEnum< SkubanaPOStatusEnum >( SkubanaPOStatusEnum.Undefined ),
+				Status = purchaseOrder.Status.ToEnum< SkubanaPOStatusEnum >( SkubanaPOStatusEnum.AWAITING_AUTHORIZATION ),
 				VendorId = purchaseOrder.VendorId,
-				PaymentTerm = purchaseOrder.PaymentTerm?.Description ?? ""
+				PaymentTerm = purchaseOrder.VendorPaymentTerm?.Description ?? ""
 			};
 		}
 
@@ -294,7 +222,6 @@ namespace SkubanaAccess.Models
 
 	public enum SkubanaPOStatusEnum
 	{
-		Undefined,
 		AWAITING_AUTHORIZATION,
 		AWAITING_VENDOR_CONFIRMATION,
 		AWAITING_MODIFICATION_ACCEPTANCE,
@@ -303,12 +230,6 @@ namespace SkubanaAccess.Models
 		FULFILLED,CLOSED_SHORT,
 		VOIDED,
 		CANCELED
-	}
-
-	public class SkubanaOtherCosts
-	{
-		public string Description { get; set; }
-		public Money Amount { get; set; }
 	}
 
 	public class PurchaseOrderComparer : IEqualityComparer< SkubanaPurchaseOrder >

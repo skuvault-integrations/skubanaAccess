@@ -68,6 +68,7 @@
   <ItemGroup>
     <Compile Include="AuthenticationTests.cs" />
     <Compile Include="BaseTest.cs" />
+    <Compile Include="CreatePurchaseOrderRequestMapperTests.cs" />
     <Compile Include="GlobalTests.cs" />
     <Compile Include="InventoryTests.cs" />
     <Compile Include="OrderMapperTests.cs" />
@@ -78,6 +79,7 @@
     <Compile Include="PurchaseOrdersMappersTests.cs" />
     <Compile Include="PurchaseOrdersTests.cs" />
     <Compile Include="TestCredentials.cs" />
+    <Compile Include="VendorMapperTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SkubanaAccess\SkubanaAccess.csproj">
