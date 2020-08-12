@@ -38,7 +38,9 @@ namespace SkubanaAccess.Services.Inventory
 			if ( token.IsCancellationRequested )
 			{
 				var exceptionDetails = CreateMethodCallInfo( base.Config.Environment.BaseApiUrl, mark, additionalInfo: this.AdditionalLogInfo() );
-				SkubanaLogger.LogTraceException( new SkubanaException( string.Format( "{0}. Adjust products stocks quantities request was cancelled", exceptionDetails ) ) );
+				var exception = new SkubanaException( string.Format( "{0}. Adjust products stocks quantities request was cancelled", exceptionDetails ) );
+				SkubanaLogger.LogTraceException( exception );
+				throw exception;
 			}
 
 			var chunks = skusQuantities.SplitToChunks( this.Config.UpdateProductStockBatchSize );
@@ -188,7 +190,9 @@ namespace SkubanaAccess.Services.Inventory
 			if ( token.IsCancellationRequested )
 			{
 				var exceptionDetails = CreateMethodCallInfo( base.Config.Environment.BaseApiUrl, mark, additionalInfo: this.AdditionalLogInfo() );
-				SkubanaLogger.LogTraceException( new SkubanaException( string.Format( "{0}. Create products stocks request was cancelled", exceptionDetails ) ) );
+				var exception = new SkubanaException( string.Format( "{0}. Create products stocks request was cancelled", exceptionDetails ) );
+				SkubanaLogger.LogTraceException( exception );
+				throw exception;
 			}
 
 			var chunks = productsStock.SplitToChunks( base.Config.CreateProductStockBatchSize );
@@ -296,7 +300,9 @@ namespace SkubanaAccess.Services.Inventory
 			if ( token.IsCancellationRequested )
 			{
 				var exceptionDetails = CreateMethodCallInfo( base.Config.Environment.BaseApiUrl, mark, additionalInfo: this.AdditionalLogInfo() );
-				SkubanaLogger.LogTraceException( new SkubanaException( string.Format( "{0}. Get products stock total request was cancelled", exceptionDetails ) ) );
+				var exception = new SkubanaException( string.Format( "{0}. Get products stock total request was cancelled", exceptionDetails ) );
+				SkubanaLogger.LogTraceException( exception );
+				throw exception;
 			}
 
 			var productsStock = new List< SkubanaProductStock >();
@@ -342,7 +348,9 @@ namespace SkubanaAccess.Services.Inventory
 			if ( token.IsCancellationRequested )
 			{
 				var exceptionDetails = CreateMethodCallInfo( base.Config.Environment.BaseApiUrl, mark, additionalInfo: this.AdditionalLogInfo() );
-				SkubanaLogger.LogTraceException( new SkubanaException( string.Format( "{0}. Retrieve product stock total request was cancelled", exceptionDetails ) ) );
+				var exception = new SkubanaException( string.Format( "{0}. Retrieve product stock total request was cancelled", exceptionDetails ) );
+				SkubanaLogger.LogTraceException( exception );
+				throw exception;
 			}
 
 			using( var throttler = new Throttler( 10, 1 ) )
@@ -371,7 +379,9 @@ namespace SkubanaAccess.Services.Inventory
 			if ( token.IsCancellationRequested )
 			{
 				var exceptionDetails = CreateMethodCallInfo( base.Config.Environment.BaseApiUrl, mark, additionalInfo: this.AdditionalLogInfo() );
-				SkubanaLogger.LogTraceException( new SkubanaException( string.Format( "{0}. Retrieve product detailed stock request was cancelled", exceptionDetails ) ) );
+				var exception = new SkubanaException( string.Format( "{0}. Retrieve product detailed stock request was cancelled", exceptionDetails ) );
+				SkubanaLogger.LogTraceException( exception );
+				throw exception;
 			}
 
 			using( var throttler = new Throttler( 5, 1 ) )

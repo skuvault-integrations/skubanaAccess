@@ -26,7 +26,9 @@ namespace SkubanaAccess.Services.Products
 			if ( token.IsCancellationRequested )
 			{
 				var exceptionDetails = CreateMethodCallInfo( base.Config.Environment.BaseApiUrl, mark, additionalInfo: this.AdditionalLogInfo() );
-				SkubanaLogger.LogTraceException( new SkubanaException( string.Format( "{0}. Retrieve products request was cancelled", exceptionDetails ) ) );
+				var exception = new SkubanaException( string.Format( "{0}. Retrieve products request was cancelled", exceptionDetails ) );
+				SkubanaLogger.LogTraceException( exception );
+				throw exception;
 			}
 
 			var chunks = skus.SplitToChunks( base.Config.RetrieveProductsBySkusBatchSize );
@@ -62,7 +64,9 @@ namespace SkubanaAccess.Services.Products
 			if ( token.IsCancellationRequested )
 			{
 				var exceptionDetails = CreateMethodCallInfo( base.Config.Environment.BaseApiUrl, mark, additionalInfo: this.AdditionalLogInfo() );
-				SkubanaLogger.LogTraceException( new SkubanaException( string.Format( "{0}. Retrieve updated products request was cancelled", exceptionDetails ) ) );
+				var exception = new SkubanaException( string.Format( "{0}. Retrieve updated products request was cancelled", exceptionDetails ) );
+				SkubanaLogger.LogTraceException( exception );
+				throw exception;
 			}
 
 			var result = new List< SkubanaProduct >();

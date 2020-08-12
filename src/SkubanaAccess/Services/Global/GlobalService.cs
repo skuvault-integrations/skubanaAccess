@@ -24,7 +24,9 @@ namespace SkubanaAccess.Services.Global
 			if ( token.IsCancellationRequested )
 			{
 				var exceptionDetails = CreateMethodCallInfo( base.Config.Environment.BaseApiUrl, mark, additionalInfo: this.AdditionalLogInfo() );
-				SkubanaLogger.LogTraceException( new SkubanaException( string.Format( "{0}. List warehouses request was cancelled", exceptionDetails ) ) );
+				var exception = new SkubanaException( string.Format( "{0}. List warehouses request was cancelled", exceptionDetails ) );
+				SkubanaLogger.LogTraceException( exception );
+				throw exception;
 			}
 
 			using( var command = new ListWarehousesCommand( base.Config ) )
@@ -41,7 +43,9 @@ namespace SkubanaAccess.Services.Global
 			if ( token.IsCancellationRequested )
 			{
 				var exceptionDetails = CreateMethodCallInfo( base.Config.Environment.BaseApiUrl, skubanaMark, additionalInfo: this.AdditionalLogInfo() );
-				SkubanaLogger.LogTraceException( new SkubanaException( string.Format( "{0}. Get warehouse by id request was cancelled", exceptionDetails ) ) );
+				var exception = new SkubanaException( string.Format( "{0}. Get warehouse by id request was cancelled", exceptionDetails ) );
+				SkubanaLogger.LogTraceException( exception );
+				throw exception;
 			}
 
 			using ( var command = new GetWarehouseByIdCommand( base.Config, warehouseId ) )
