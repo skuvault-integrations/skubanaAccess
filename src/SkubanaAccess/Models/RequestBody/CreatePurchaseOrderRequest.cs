@@ -75,7 +75,7 @@ namespace SkubanaAccess.Models.RequestBody
 				Items = purchaseOrder.Items.Select( x => x.ToCreatePurchaseOrderItem( vendorProductIdsBySku[ x.MasterSku ] ) ),
 				Status = purchaseOrder.Status.ToString(),
 				VendorConfirmByDate = purchaseOrder.VendorConfirmByDate.Value.ConvertDateTimeToStr(),
-				VendorId = purchaseOrder.VendorId,
+				VendorId = purchaseOrder.Vendor.VendorId,
 				AuthorizerUserId = purchaseOrder.AuthorizerUserId,
 				AutoUpdatesEnabled = false,
 				Currency = purchaseOrder.Currency,

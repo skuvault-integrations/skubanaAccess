@@ -102,7 +102,6 @@ namespace SkubanaAccessTests
 					Currency = "USD",
 					Items = items,
 					CustomPurchaseOrderNumber = customerPONum,
-					VendorId = vendorId,
 					Vendor = new SkubanaVendor
 					{
 						PaymentTermId = 2,

@@ -211,7 +211,7 @@ namespace SkubanaAccess.Services.PurchaseOrders
 			foreach ( var poItem in poItems )
 			{
 				var sku = poItem.MasterSku;
-				var vendorProductId = await GetVendorProductIdByProductIdVendorIdAsync(productIdsBySkus[ sku ], vendorId, token, mark);
+				var vendorProductId = await GetVendorProductIdByProductIdVendorIdAsync( productIdsBySkus[ sku ], vendorId, token, mark );
 				if ( !vendorProductIdsBySku.ContainsKey( sku ) && vendorProductId != null )
 				{
 					vendorProductIdsBySku.Add( sku, vendorProductId.Value );

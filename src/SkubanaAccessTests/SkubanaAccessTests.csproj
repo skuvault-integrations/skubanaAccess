@@ -68,7 +68,7 @@
   <ItemGroup>
     <Compile Include="AuthenticationTests.cs" />
     <Compile Include="BaseTest.cs" />
-    <Compile Include="CreatePurchaseOrderRequestMapperTests.cs" />
+    <Compile Include="PurchaseOrderCreateRequestMapperTests.cs" />
     <Compile Include="GlobalTests.cs" />
     <Compile Include="InventoryTests.cs" />
     <Compile Include="OrderMapperTests.cs" />

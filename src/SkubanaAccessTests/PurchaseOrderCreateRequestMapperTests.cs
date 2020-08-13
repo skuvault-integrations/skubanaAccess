@@ -44,6 +44,7 @@ namespace SkubanaAccessTests
 			};
 			var vendor = new SkubanaVendor
 			{
+				VendorId = vendorId,
 				PaymentTermId = 123,
 				DefaultIncotermShippingRuleId = 234,
 				DefaultPurchaseOrderTemplateId = 987
@@ -54,7 +55,6 @@ namespace SkubanaAccessTests
 				Items = new List< SkubanaPurchaseOrderItem > { poItem },
 				Status = SkubanaPOStatusEnum.PENDING_DELIVERY,
 				VendorConfirmByDate = vendorConfirmByDate,
-				VendorId = vendorId,
 				Vendor = vendor,
 				Currency = currency,
 				AuthorizerUserId = authorizerUserId,

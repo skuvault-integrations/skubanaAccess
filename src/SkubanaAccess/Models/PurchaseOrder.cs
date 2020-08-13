@@ -143,20 +143,38 @@ namespace SkubanaAccess.Models
 	{
 		public long Id { get; set; }
 		public string Currency { get; set; }
+		/// <summary>
+		/// Used for pull only
+		/// </summary>
 		public DateTime DateCreatedUtc { get; set; }
+		/// <summary>
+		/// Used for pull only
+		/// </summary>
 		public DateTime? DateModifiedUtc { get; set; }
 		public long DestinationWarehouseId { get; set; }
 		public string InternalNotes { get; set; }
+		/// <summary>
+		/// Used for pull only
+		/// </summary>
 		public string Number { get; set; }
 		public string CustomPurchaseOrderNumber { get; set; }
 		public IEnumerable< SkubanaPurchaseOrderItem > Items { get; set; }
 		public IEnumerable< OtherCost > OtherCosts { get; set; }
 		public Money ShippingCost { get; set; }
 		public SkubanaPOStatusEnum Status { get; set; }
+		/// <summary>
+		/// Used for pull only
+		/// </summary>
 		public long VendorId { get; set; }
+		/// <summary>
+		/// Used for pull only
+		/// </summary>
 		public string PaymentTerm { get; set; }
 		public long? AuthorizerUserId { get; set; }
 		public DateTime? VendorConfirmByDate { get; set; }
+		/// <summary>
+		/// Used for push only
+		/// </summary>
 		public SkubanaVendor Vendor { get; set; }
 	}
 
