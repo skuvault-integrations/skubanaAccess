@@ -56,9 +56,9 @@ namespace SkubanaAccessTests
 		}
 
 		[ Test ]
-		public async Task GetVendorsAsync()
+		public async Task GetActiveVendorsAsync()
 		{
-			var vendors = await _purchaseOrdersService.GetVendorsAsync( CancellationToken.None, Mark.Blank() );
+			var vendors = await _purchaseOrdersService.GetActiveVendorsAsync( CancellationToken.None, Mark.Blank() );
 
 			vendors.Should().NotBeEmpty();
 		}

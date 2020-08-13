@@ -310,12 +310,12 @@ namespace SkubanaAccess.Services.PurchaseOrders
 		}
 
 		/// <summary>
-		/// Get all vendors
+		/// Get active vendors
 		/// </summary>
 		/// <param name="token"></param>
 		/// <param name="mark"></param>
 		/// <returns></returns>
-		public async Task< IEnumerable< SkubanaVendor > > GetVendorsAsync( CancellationToken token, Mark mark )
+		public async Task< IEnumerable< SkubanaVendor > > GetActiveVendorsAsync( CancellationToken token, Mark mark )
 		{
 			var skubanaMark = new Shared.Mark( mark.MarkValue );
 
@@ -334,7 +334,7 @@ namespace SkubanaAccess.Services.PurchaseOrders
 			{
 				while( true )
 				{
-					var command = new GetVendorsCommand( base.Config, page, base.Config.RetrieveVendorsPageSize )
+					var command = new GetActiveVendorsCommand( base.Config, page, base.Config.RetrieveVendorsPageSize )
 					{
 						Throttler = throttler
 					};
