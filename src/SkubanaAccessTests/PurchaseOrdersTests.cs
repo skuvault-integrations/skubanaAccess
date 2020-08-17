@@ -68,8 +68,9 @@ namespace SkubanaAccessTests
 		{
 			const long vendorId = 762;
 			const long productId = 681732;
+			var throttler = SkubanaAccess.Throttling.Throttler.GetDefaultThrottler();
 
-			var result = await _purchaseOrdersService.GetVendorProductIdByProductIdVendorIdAsync( productId, vendorId, CancellationToken.None, Mark.Blank() );
+			var result = await _purchaseOrdersService.GetVendorProductIdByProductIdVendorIdAsync( productId, vendorId, throttler, CancellationToken.None, Mark.Blank() );
 
 			result.Should().Be( 34960 );
 		}

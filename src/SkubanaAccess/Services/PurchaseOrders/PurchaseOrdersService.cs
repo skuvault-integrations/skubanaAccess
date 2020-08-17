@@ -71,7 +71,7 @@ namespace SkubanaAccess.Services.PurchaseOrders
 			var purchaseOrders = new List< SkubanaPurchaseOrder >();
 			var page = 1;
 
-			using ( var throttler = new Throttler( 5, 1 ) )
+			using ( var throttler = Throttler.GetDefaultThrottler() )
 			{
 				while ( true )
 				{
@@ -108,7 +108,7 @@ namespace SkubanaAccess.Services.PurchaseOrders
 			var purchaseOrders = new List< SkubanaPurchaseOrder >();
 			var page = 1;
 
-			using ( var throttler = new Throttler( 5, 1 ) )
+			using ( var throttler = Throttler.GetDefaultThrottler() )
 			{
 				while ( true )
 				{
@@ -168,7 +168,8 @@ namespace SkubanaAccess.Services.PurchaseOrders
 			}
 
 			var posProductIdsBySkus = await GetProductIdsBySkusAsync( purchaseOrders, token, skubanaMark );
-			using( var throttler = new Throttler( 1, 30 ) )	//TODO GUARD-709 Seems slow. Copied from CreateProductsStock. Pending question for Bulat
+			using( var throttlerCreatePO = Throttler.GetDefaultThrottler() )
+			using( var throttlerGetVendorProduct = Throttler.GetDefaultThrottler() )
 			{
 				foreach ( var purchaseOrder in purchaseOrders )
 				{
@@ -180,10 +181,10 @@ namespace SkubanaAccess.Services.PurchaseOrders
 						continue;
 					}
 
-					var vendorProductIdsBySku = await GetPurchaseOrderVendorProductIdsAsync( purchaseOrder.Items, vendorId.Value, posProductIdsBySkus, token, mark );
+					var vendorProductIdsBySku = await GetPurchaseOrderVendorProductIdsAsync( purchaseOrder.Items, vendorId.Value, posProductIdsBySkus, throttlerGetVendorProduct, token, mark );
 					var command = new CreatePurchaseOrderCommand( base.Config, purchaseOrder, vendorProductIdsBySku )
 					{
-						Throttler = throttler
+						Throttler = throttlerCreatePO
 					};
 					var response = await base.PutAsync< SkubanaResponse< CreatePurchaseOrderRequestBody > >( command, token, skubanaMark ).ConfigureAwait( false );
 
@@ -205,13 +206,13 @@ namespace SkubanaAccess.Services.PurchaseOrders
 		}
 
 		private async Task< Dictionary< string, long > > GetPurchaseOrderVendorProductIdsAsync( IEnumerable< SkubanaPurchaseOrderItem > poItems, 
-			long vendorId, IDictionary< string, long > productIdsBySkus, CancellationToken token, Mark mark )
+			long vendorId, IDictionary< string, long > productIdsBySkus, Throttler throttler, CancellationToken token, Mark mark )
 		{
 			var vendorProductIdsBySku = new Dictionary< string, long >();
 			foreach ( var poItem in poItems )
 			{
 				var sku = poItem.MasterSku;
-				var vendorProductId = await GetVendorProductIdByProductIdVendorIdAsync( productIdsBySkus[ sku ], vendorId, token, mark );
+				var vendorProductId = await GetVendorProductIdByProductIdVendorIdAsync( productIdsBySkus[ sku ], vendorId, throttler, token, mark );
 				if ( !vendorProductIdsBySku.ContainsKey( sku ) && vendorProductId != null )
 				{
 					vendorProductIdsBySku.Add( sku, vendorProductId.Value );
@@ -230,7 +231,7 @@ namespace SkubanaAccess.Services.PurchaseOrders
 		/// <param name="mark"></param>
 		/// <returns></returns>
 		public async Task< long? > GetVendorProductIdByProductIdVendorIdAsync( long productId, long vendorId,
-			CancellationToken token, Mark mark )
+			Throttler throttler, CancellationToken token, Mark mark )
 		{
 			var skubanaMark = new Shared.Mark( mark.MarkValue );
 
@@ -242,7 +243,10 @@ namespace SkubanaAccess.Services.PurchaseOrders
 				throw exception;
 			}
 
-			var command = new GetVendorProductByProductIdVendorIdCommand( this.Config, productId, vendorId );
+			var command = new GetVendorProductByProductIdVendorIdCommand( this.Config, productId, vendorId )
+			{ 
+				Throttler = throttler
+			};
 
 			var response = await base.GetAsync< IEnumerable< VendorProduct > >( command, token, skubanaMark ).ConfigureAwait( false );
 

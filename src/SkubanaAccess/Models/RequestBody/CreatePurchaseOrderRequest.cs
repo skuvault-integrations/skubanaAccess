@@ -70,7 +70,7 @@ namespace SkubanaAccess.Models.RequestBody
 			return new CreatePurchaseOrderRequestBody
 			{
 				DestinationWarehouseId = purchaseOrder.DestinationWarehouseId,
-				Format = "PO_PDF_ATTACHMENT",		//TODO GUARD-709 Pending question
+				Format = "PO_PDF_ATTACHMENT",
 				PaymentTermId = purchaseOrder.Vendor.PaymentTermId.Value,
 				Items = purchaseOrder.Items.Select( x => x.ToCreatePurchaseOrderItem( vendorProductIdsBySku[ x.MasterSku ] ) ),
 				Status = purchaseOrder.Status.ToString(),

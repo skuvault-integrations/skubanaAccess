@@ -34,7 +34,7 @@ namespace SkubanaAccess.Services.Products
 			var chunks = skus.SplitToChunks( base.Config.RetrieveProductsBySkusBatchSize );
 			var result = new List< SkubanaProduct >();
 
-			using( var throttler = new Throttler( 5, 1 ) )
+			using( var throttler = new Throttler( 3, 15 ) )	//3 per 10 seconds, no hourly limit
 			{
 				foreach( var chunk in chunks )
 				{

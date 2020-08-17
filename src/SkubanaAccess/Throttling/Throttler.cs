@@ -34,6 +34,11 @@ namespace SkubanaAccess.Throttling
 		private bool _timerStarted = false;
 		private object _lock = new object();
 
+		public static Throttler GetDefaultThrottler()
+		{
+			return new Throttler( DefaultThrottleLimits.MaxQuota, DefaultThrottleLimits.QuotaRestoreTimeInSecs );
+		}
+
 		/// <summary>
 		/// Throttler constructor. See code section for details
 		/// </summary>
@@ -151,5 +156,19 @@ namespace SkubanaAccess.Throttling
 			Dispose( true );
 		}
 		#endregion
+	}
+
+	/// <summary>
+	/// Max Initial Request: 5 requests, 
+	/// Restore Rate: 1 per 1000 ms, 
+	/// Hourly Limit: 360
+	/// </summary>
+	public static class DefaultThrottleLimits
+	{
+		public const int MaxQuota = 1;
+		/// <summary>
+		/// To stay below the hourly limit 360/hr = 1/10 sec
+		/// </summary>
+		public const int QuotaRestoreTimeInSecs = 12;
 	}
 }
