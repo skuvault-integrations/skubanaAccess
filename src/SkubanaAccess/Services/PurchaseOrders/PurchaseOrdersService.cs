@@ -356,5 +356,57 @@ namespace SkubanaAccess.Services.PurchaseOrders
 
 			return result;
 		}
+
+		/// <summary>
+		/// Get all purchase orders for the warehouse
+		/// </summary>
+		/// <param name="warehouseId"></param>
+		/// <param name="token"></param>
+		/// <param name="mark"></param>
+		/// <returns>Dictionary of CustomPurchaseOrderNumber/SkubanaPurchaseOrder pairs</returns>
+		public async Task< IDictionary< string, SkubanaPurchaseOrder > > GetPurchaseOrdersByWarehouseAsync( long warehouseId, CancellationToken token, Mark mark )
+		{
+			var skubanaMark = new Shared.Mark( mark.MarkValue );
+
+			if ( token.IsCancellationRequested )
+			{
+				var exceptionDetails = CreateMethodCallInfo( base.Config.Environment.BaseApiUrl, skubanaMark, additionalInfo: this.AdditionalLogInfo() );
+				var exception = new SkubanaException( string.Format( "{0}. Get all purchase orders for the warehouse request was cancelled", exceptionDetails ) );
+				SkubanaLogger.LogTraceException( exception );
+				throw exception;
+			}
+
+			var purchaseOrders = new Dictionary< string, SkubanaPurchaseOrder >();
+			var page = 1;
+
+			using ( var throttler = Throttler.GetDefaultThrottler() )
+			{
+				while ( true )
+				{
+					var command = new RetrieveAllPurchaseOrdersCommand( base.Config, page, base.Config.RetrievePurchaseOrdersPageSize )
+					{
+						Throttler = throttler
+					};
+					var pageData = await base.GetAsync< IEnumerable< PurchaseOrder > >( command, token, skubanaMark ).ConfigureAwait( false );
+
+					if ( pageData == null || !pageData.Any() )
+					{
+						break;
+					}
+
+					foreach( var purchaseOrder in pageData.FilterByWarehouse( warehouseId ) )
+					{
+						if( !string.IsNullOrWhiteSpace( purchaseOrder.CustomPurchaseOrderNumber ) )
+						{
+							purchaseOrders[ purchaseOrder.CustomPurchaseOrderNumber ] = purchaseOrder.ToSVPurchaseOrder();
+
+						}
+					}
+					++page;
+				}
+			}
+
+			return purchaseOrders;
+		}
 	}
 }

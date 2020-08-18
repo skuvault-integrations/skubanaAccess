@@ -8,7 +8,6 @@ using NUnit.Framework;
 using SkubanaAccess.Models;
 using SkubanaAccess.Services.Products;
 using SkubanaAccess.Services.PurchaseOrders;
-using SkubanaAccess.Shared;
 using Mark = Netco.Logging.Mark;
 
 namespace SkubanaAccessTests
@@ -142,6 +141,15 @@ namespace SkubanaAccessTests
 
 			var purchaseOrder = purchaseOrders.FirstOrDefault( x => x.CustomPurchaseOrderNumber == customerPONum );
 			purchaseOrder.Should().NotBeNull();
+		}
+
+		[ Test ]
+		public async Task GetPurchaseOrdersByWarehouseAsync()
+		{
+			var result = await this._purchaseOrdersService.GetPurchaseOrdersByWarehouseAsync( _warehouseId, CancellationToken.None, Mark.Blank() );
+
+			result.Should().NotBeEmpty();
+			result.Any( x => x.Value.DestinationWarehouseId != _warehouseId ).Should().BeFalse();
 		}
 	}
 }
