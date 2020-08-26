@@ -16,5 +16,6 @@ namespace SkubanaAccess.Services.PurchaseOrders
 		Task CreatePurchaseOrdersAsync( IEnumerable< SkubanaPurchaseOrder > purchaseOrders, CancellationToken token, Mark mark );
 		Task< long? > GetVendorProductIdByProductIdVendorIdAsync( long productId, long vendorId, Throttler throttler, CancellationToken token, Mark mark );
 		Task< IDictionary< string, SkubanaPurchaseOrder > >  GetPurchaseOrdersByWarehouseAsync( long warehouseId, CancellationToken token, Mark mark );
+		Task< IDictionary< string, SkubanaPurchaseOrder > > GetPOsByCustomPurchaseOrderNumbersAsync( IEnumerable< string > poNumbers, CancellationToken token, Mark mark );
 	}
 }

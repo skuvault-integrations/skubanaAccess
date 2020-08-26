@@ -151,5 +151,21 @@ namespace SkubanaAccessTests
 			result.Should().NotBeEmpty();
 			result.Any( x => x.Value.DestinationWarehouseId != _warehouseId ).Should().BeFalse();
 		}
+
+		[ Test ]
+		public async Task GetPOsByCustomPurchaseOrderNumbersAsync()
+		{
+			const string poNumber = "CustomPONumber234";
+			var poNumbers = new []
+			{ 
+				poNumber,
+				"CustomPONumber2345"
+			};
+
+			var result = await this._purchaseOrdersService.GetPOsByCustomPurchaseOrderNumbersAsync( poNumbers, CancellationToken.None, Mark.Blank() );
+
+			result.Count().Should().Be( 2 );
+			result.First().Key.Should().Be( poNumber );
+		}
 	}
 }
