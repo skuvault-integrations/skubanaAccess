@@ -169,7 +169,7 @@ namespace SkubanaAccess.Services.PurchaseOrders
 
 			var posProductIdsBySkus = await GetProductIdsBySkusAsync( purchaseOrders, token, skubanaMark );
 			using( var throttlerCreatePO = Throttler.GetDefaultThrottler() )
-			using( var throttlerGetVendorProduct = Throttler.GetDefaultThrottler() )
+			using( var throttlerGetVendorProduct = new Throttler( 5, 12 ) )	//Rate limit 5 / 10 sec, no hourly limit
 			{
 				foreach ( var purchaseOrder in purchaseOrders )
 				{
@@ -423,7 +423,7 @@ namespace SkubanaAccess.Services.PurchaseOrders
 			if ( token.IsCancellationRequested )
 			{
 				var exceptionDetails = CreateMethodCallInfo( base.Config.Environment.BaseApiUrl, skubanaMark, additionalInfo: this.AdditionalLogInfo() );
-				var exception = new SkubanaException( string.Format( "{0}. Get all purchase orders for the warehouse request was cancelled", exceptionDetails ) );
+				var exception = new SkubanaException( string.Format( "{0}. GetPOsByCustomPurchaseOrderNumbers request was cancelled", exceptionDetails ) );
 				SkubanaLogger.LogTraceException( exception );
 				throw exception;
 			}
