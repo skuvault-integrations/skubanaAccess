@@ -63,6 +63,10 @@ namespace SkubanaAccess.Models
 		public string Notes { get; set; }
 		[ JsonProperty( "currency" ) ]
 		public string Currency { get; set; }
+		[JsonProperty("shipment")]
+		public Shipment Shipment { get; set; }
+		[JsonProperty("shipments")]
+		public IEnumerable< Shipments > Shipments { get; set; }
 	}
 
 	public class OrderItem
@@ -83,6 +87,38 @@ namespace SkubanaAccess.Models
 		public Money UnitPrice { get; set; }
 		[ JsonProperty( "discount" ) ]
 		public Money Discount { get; set; }
+	}
+
+	public class Shipment
+	{
+		[JsonProperty("shipmentId")]
+		public long ShipmentId { get; set; }
+		[JsonProperty("type")]
+		public string ShipmentType { get; set; }
+		[JsonProperty("created")]
+		public string CreatedDate { get; set; }
+		[JsonProperty("shipDate")]
+		public string EstimatedShipDate { get; set; }
+		[JsonProperty("estimatedArrival")]
+		public string EstimatedDeliveryDate { get; set; }
+		[JsonProperty("trackingNumber")]
+		public string TrackingNumber { get; set; }
+		[JsonProperty("deliveryStatus")]
+		public string DeliveryStatus { get; set; }
+	}
+
+	public class Shipments
+	{
+		[JsonProperty("items")]
+		public IEnumerable< ShipmentsItem > Items { get; set; }
+	}
+
+	public class ShipmentsItem
+	{
+		[JsonProperty("listingSku")]		
+		public string Sku { get; set; }
+		[JsonProperty("quantity")]
+		public int? Quantity { get; set; }
 	}
 
 	public class ShippingMethod
@@ -122,6 +158,24 @@ namespace SkubanaAccess.Models
 		FBA_Inbound_Shipment_Plan
 	}
 
+	public enum SkubanaShipmentTypeEnum
+	{
+		Fulfillment,
+		Return
+	}
+
+	public enum SkubanaShipmentDeliveryStatusEnum
+	{
+		Unknown,
+		In_Transit,
+		Delivered,
+		Lost_In_Transit,
+		Return_To_Sender,
+		Undeliverable,
+		Forwarded,
+		Voided		
+	}
+
 	public class SkubanaOrderItem
 	{
 		public string Sku { get; set; }
@@ -137,6 +191,25 @@ namespace SkubanaAccess.Models
 		public SkubanaShippingAddress Address { get; set; }
 		public string Carrier { get; set; }
 		public decimal ShippingCost { get; set; }
+		public SkubanaShipment Shipment { get; set; }
+	}
+
+	public class SkubanaShipment
+	{		
+		public long ShipmentId { get; set; }	
+		public SkubanaShipmentTypeEnum ShipmentType { get; set; }		
+		public DateTime CreatedDate { get; set; }		
+		public DateTime? EstimatedShipDate { get; set; }		
+		public DateTime? EstimatedDeliveryDate { get; set; }		
+		public string TrackingNumber { get; set; }		
+		public SkubanaShipmentDeliveryStatusEnum DeliveryStatus { get; set; }
+		public IEnumerable< SkubanaShipmentItem > Items { get; set; }
+	}
+
+	public class SkubanaShipmentItem
+	{	
+		public string Sku { get; set; }	
+		public int Quantity { get; set; }
 	}
 
 	public class SkubanaShippingAddress
@@ -162,7 +235,7 @@ namespace SkubanaAccess.Models
 	{
 		public static SkubanaOrder ToSVOrder( this Order order )
 		{
-			return new SkubanaOrder()
+			var svOrder = new SkubanaOrder()
 			{
 				Id = order.Id,
 				Number = order.Number,
@@ -172,9 +245,9 @@ namespace SkubanaAccess.Models
 				Items = GetOrderItems( order ),
 				Total = order.Total?.Amount ?? 0,
 				Discount = order.Discount?.Amount ?? 0,
-				ShippingInfo = new SkubanaShippingInfo()
+				ShippingInfo = new SkubanaShippingInfo
 				{
-					Address = new SkubanaShippingAddress()
+					Address = new SkubanaShippingAddress
 					{
 						Line1 = order.ShipAddress1,
 						Line2 = order.ShipAddress2,
@@ -186,16 +259,33 @@ namespace SkubanaAccess.Models
 					},
 					Carrier = order.ShippingMethod?.Carrier,
 					ShippingCost = order.ShippingCost?.Amount ?? 0,
-					ContactInfo = new SkubanaShippingContactInfo()
+					ContactInfo = new SkubanaShippingContactInfo
 					{
 						CompanyName = order.ShipCompany,
 						Name = order.ShipName,
 						EmailAddress = order.ShipEmail,
 						PhoneNumber = order.ShipPhone
-					}
+					}					
 				},
 				Notes = order.Notes
 			};
+
+			if ( order.Shipment != null )
+			{ 
+				svOrder.ShippingInfo.Shipment = new SkubanaShipment
+				{
+					ShipmentId = order.Shipment.ShipmentId,
+					ShipmentType = order.Shipment.ShipmentType.ToEnum( SkubanaShipmentTypeEnum.Fulfillment ),
+					CreatedDate = order.Shipment.CreatedDate.ConvertStrToDateTime().ToUniversalTime(),
+					EstimatedShipDate = order.Shipment.EstimatedShipDate?.ConvertStrToDateTime().ToUniversalTime(),
+					EstimatedDeliveryDate = order.Shipment.EstimatedDeliveryDate?.ConvertStrToDateTime().ToUniversalTime(),
+					TrackingNumber = order.Shipment.TrackingNumber,
+					DeliveryStatus = order.Shipment.DeliveryStatus.ToEnum< SkubanaShipmentDeliveryStatusEnum >( SkubanaShipmentDeliveryStatusEnum.Unknown ),
+					Items = GetShipmentItems( order.Shipments )
+				};
+			}
+
+			return svOrder;
 		}
 
 		private static IEnumerable< SkubanaOrderItem > GetOrderItems( Order order )
@@ -219,6 +309,30 @@ namespace SkubanaAccess.Models
 					Discount = orderItem.Discount?.Amount ?? 0,
 					UnitPrice = orderItem.UnitPrice?.Amount ?? 0,
 					Tax = orderItem.Tax?.Amount ?? 0
+				} );
+			}
+
+			return result;
+		}
+
+		private static IEnumerable< SkubanaShipmentItem > GetShipmentItems( IEnumerable< Shipments > shipments )
+		{
+			var result = new List< SkubanaShipmentItem >();
+
+			if ( shipments == null || !shipments.Any() )
+			{
+				return result;
+			}			
+
+			foreach( var shipmentItem in shipments.SelectMany( s => s.Items ).ToList() )
+			{
+				if ( string.IsNullOrWhiteSpace( shipmentItem.Sku ) )
+					continue;
+
+				result.Add( new SkubanaShipmentItem
+				{
+					Sku = shipmentItem.Sku,
+					Quantity = shipmentItem?.Quantity ?? 0
 				} );
 			}
 
