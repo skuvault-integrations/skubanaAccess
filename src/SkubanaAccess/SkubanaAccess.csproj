@@ -9,7 +9,7 @@
     <PackageLicenseUrl>https://github.com/skuvault/skubanaAccess/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/skuvault/skubanaAccess</PackageProjectUrl>
     <RepositoryUrl>https://github.com/skuvault/skubanaAccess</RepositoryUrl>
-    <Version>1.2.0.0-alpha</Version>
+    <Version>1.2.1.0</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <AssemblyVersion>1.2.0.0</AssemblyVersion>
     <FileVersion>1.2.0.0</FileVersion>
