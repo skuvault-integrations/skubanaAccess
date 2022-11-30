@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -379,7 +380,8 @@ namespace SkubanaAccess.Services.Inventory
 				using( var command = new GetProductStockCommand( base.Config, sku, warehouseId ){ Throttler = throttler } )
 				{
 					var stock = await base.GetAsync< IEnumerable< DetailedProductStock > >( command, token, mark ).ConfigureAwait( false );
-					return stock.Select( s => new SkubanaProductStock() { ProductId = s.Product.Id, ProductSku = s.Product.Sku, OnHandQuantity = s.Quantity, LocationName = s.Location.LocationName } );
+					var filteredStock = stock.ToList().FindAll( s => s.Product.Sku.Equals( sku, StringComparison.Ordinal ) );
+					return filteredStock.Select( s => new SkubanaProductStock() { ProductId = s.Product.Id, ProductSku = s.Product.Sku, OnHandQuantity = s.Quantity, LocationName = s.Location.LocationName } );
 				}
 			}
 		}

@@ -211,5 +211,29 @@ namespace SkubanaAccessTests
 			var detailedStock = await this._inventoryService.GetDetailedProductStock( _testSkuWithoutStock, _inHouseWarehouseId, CancellationToken.None );
 			detailedStock.FirstOrDefault( s => s.LocationName == newLocationName ).OnHandQuantity.Should().Be( quantity );
 		}
+		
+		[ Test( Description = "To test filter that selects only exact matches of input sku from Skubana's response" )]
+		public async Task GetDetailedProductStock_ShouldFilterResponseToContainOnlyDataFromInputSku_WhenSkuHasStock()
+		{
+			var stockInfo = await this._inventoryService.GetDetailedProductStock( _testSku1, _inHouseWarehouseId, CancellationToken.None );
+
+			Assert.That(stockInfo.All(s => s.ProductSku == _testSku1));
+		}
+
+		[ Test ]
+		public async Task GetDetailedProductStock_ShouldReturnEmptyResponse_WhenInputSkuDoesNotHaveStock_ButIsContainedInOtherSkuCodes()
+		{
+			// This product exists in Skubana but does not have any stocks.
+			const string testSku1 = "GUARD2515-SKU";
+			// This product must contain another existing sku code (testSku1) and should have at least one stock in Skubana.
+			const string testSku2 = "GUARD2515-SKU-01";
+			
+			var detailsFromProductWithNoStocks = await this._inventoryService.GetDetailedProductStock( testSku1, _inHouseWarehouseId, CancellationToken.None );
+			var detailsFromProductWithStock = await this._inventoryService.GetDetailedProductStock( testSku2, _inHouseWarehouseId, CancellationToken.None );
+
+			// Should not contain any data, even if the endpoint returns info of other skus that contain the input sku code (like testSku2).
+			Assert.That( detailsFromProductWithNoStocks, Is.Empty );
+			Assert.That( detailsFromProductWithStock.All( s => s.ProductSku == testSku2 ) );
+		}
 	}
 }
