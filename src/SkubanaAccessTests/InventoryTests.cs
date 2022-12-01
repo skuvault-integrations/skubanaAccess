@@ -212,6 +212,7 @@ namespace SkubanaAccessTests
 			detailedStock.FirstOrDefault( s => s.LocationName == newLocationName ).OnHandQuantity.Should().Be( quantity );
 		}
 		
+		[ Explicit ]
 		[ Test( Description = "To test filter that selects only exact matches of input sku from Skubana's response" )]
 		public async Task GetDetailedProductStock_ShouldFilterResponseToContainOnlyDataFromInputSku_WhenSkuHasStock()
 		{
@@ -220,6 +221,7 @@ namespace SkubanaAccessTests
 			Assert.That(stockInfo.All(s => s.ProductSku == _testSku1));
 		}
 
+		[ Explicit ]
 		[ Test ]
 		public async Task GetDetailedProductStock_ShouldReturnEmptyResponse_WhenInputSkuDoesNotHaveStock_ButIsContainedInOtherSkuCodes()
 		{
