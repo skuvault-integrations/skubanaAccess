@@ -380,6 +380,7 @@ namespace SkubanaAccess.Services.Inventory
 				using( var command = new GetProductStockCommand( base.Config, sku, warehouseId ){ Throttler = throttler } )
 				{
 					var stock = await base.GetAsync< IEnumerable< DetailedProductStock > >( command, token, mark ).ConfigureAwait( false );
+					// Need to filter out products with skus that do not exactly match the input sku since the endpoint originally does include them.
 					var filteredStock = stock.Where( s => s.Product.Sku.Equals( sku, StringComparison.Ordinal ) );
 					return filteredStock.Select( s => new SkubanaProductStock() { ProductId = s.Product.Id, ProductSku = s.Product.Sku, OnHandQuantity = s.Quantity, LocationName = s.Location.LocationName } );
 				}
