@@ -34,3 +34,7 @@ _ReSharper*/
 build
 log
 *Credentials*.csv
+
+# JetBrains Rider
+.idea/
+*.sln.iml
